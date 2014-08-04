@@ -3,9 +3,12 @@
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
+#include <vector>
+#include "DirectXCollision.h"
 
 namespace Snake
 {
+	const float NODE_SIZE = 1.0f;
 	enum Direction
 	{
 		up = 1,
@@ -19,6 +22,8 @@ namespace Snake
 		int x = 0;
 		int y = 0;
 		int size = 1;
+		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
+			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
 		Direction direction = Direction::up;
 		Node* next = nullptr;
 	};
@@ -76,6 +81,30 @@ namespace Snake
 
 			count--;
 		}
+
+		// 
+		bool IsIntersectWithBody()
+		{
+			bool is = false;
+			if (listHead->next != nullptr)
+			{
+				DirectX::BoundingBox headBB = listHead->boundingBox;
+				Node* tempNode = listHead->next;
+				DirectX::BoundingBox tempBB = tempNode->boundingBox;
+
+				while (tempNode != nullptr)
+				{
+					if (headBB.Intersects(tempBB))
+					{
+						is = true;
+						break;
+					}
+					tempNode = tempNode->next;
+				}
+				tempNode = nullptr;
+			}
+			
+		}
 	};
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
@@ -91,6 +120,7 @@ namespace Snake
 		void TrackingUpdate(float positionX);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }
+
 		
 		void Move(int step);
 		void Move(int step, Direction direction);
@@ -101,7 +131,8 @@ namespace Snake
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
 
-	private:
+	private:	
+
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 

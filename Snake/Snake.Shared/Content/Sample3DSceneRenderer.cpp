@@ -17,11 +17,13 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_tracking(false),
 	m_deviceResources(deviceResources)
 {
+	 
+
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	m_snake = std::make_unique<List>();
 	m_snake->AddHeader();
 	m_snake->AddHeader();
-	//m_snake->AddNode();
+	m_snake->AddHeader();
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
@@ -38,6 +40,7 @@ void Sample3DSceneRenderer::Move(int step)
 // Move default model matrix
 void Sample3DSceneRenderer::Move(int step, Direction direction)
 {
+	
 	// Change direction of header	
 	if (direction != (Direction)(-(int)m_snake->listHead->direction))
 	{
@@ -230,6 +233,10 @@ void Sample3DSceneRenderer::Render()
 
 		XMMATRIX translation = XMMatrixTranslation((float)snakeNode->x, (float)snakeNode->y, 0.0f);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+		// Transform the node's BoundingBox.
+		snakeNode->boundingBox.Transform(snakeNode->boundingBox, XMLoadFloat4x4(&m_constantBufferData.model));
+		
+
 		// Send the constant buffer to the graphics device.
 		context->VSSetConstantBuffers(
 			0,
@@ -244,8 +251,7 @@ void Sample3DSceneRenderer::Render()
 			0
 			);
 		
-		snakeNode = snakeNode->next;
-		
+		snakeNode = snakeNode->next;		
 	}
 	snakeNode = nullptr;
 }
@@ -320,6 +326,9 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			{XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
 			{XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 		};
+	
+
+		
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
 		vertexBufferData.pSysMem = cubeVertices;
