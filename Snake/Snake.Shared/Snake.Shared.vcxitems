@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{bd08e275-19f7-4f66-a830-6d1b7214cf89}</ItemsProjectGuid>
+    <ItemsRootNamespace>Snake</ItemsRootNamespace>
+    <ItemsProjectName>Snake.Shared</ItemsProjectName>
+    <SharedGUID>9e6d784d-4b7b-4edc-aeb4-0d5f70f9050e</SharedGUID>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SnakeMain.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\DeviceResources.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\DeviceResources.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\DirectXHelper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\StepTimer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Content\SampleFpsTextRenderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Content\Sample3DSceneRenderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
+      <ShaderType>Vertex</ShaderType>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+</Project>
