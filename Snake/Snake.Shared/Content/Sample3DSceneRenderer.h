@@ -28,7 +28,7 @@ namespace Snake
 		Node* listHead = new Node;
 		Node* listEnd = listHead;
 		int count = 1;
-		//Direction direction = Direction::up;
+		
 		// Add node to the header.
 		void AddHeader()
 		{

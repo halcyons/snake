@@ -96,7 +96,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	// This sample makes use of a right-handed coordinate system using row-major matrices.
 	
-	XMMATRIX perspectiveMatrix = XMMatrixOrthographicLH(outputSize.Width / 100.f, outputSize.Height / 100.f, 0.01f, 1000.0f);
+	XMMATRIX perspectiveMatrix = XMMatrixOrthographicLH(outputSize.Width / 30.f, outputSize.Height / 30.f, 0.01f, 1000.0f);
 	/*XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(
 		fovAngleY,
 		aspectRatio,
@@ -125,7 +125,6 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
-	//Move(0.01f, m_snake->listHead->direction, m_model);
 	double seconds = (timer.GetTotalSeconds());
 	
 	static int i = 0;
@@ -134,31 +133,6 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 		Move(1, m_snake->listHead->direction);
 		++i;
 	}
-	
-	///*if (seconds == 2.00)
-	//{
-	//	double remainder = std::fmod(seconds, 1.0);
-	//}*/
-	//double remainder = round(std::fmod(seconds, 1.0));
-	//
-	//if (remainder == 0.00)
-	//{
-	//	Move(1, m_snake->listHead->direction);
-	//}
-	
-
-	//if (!m_tracking)
-	//{
-
-	//	//Move(1);
-
-	//	// Convert degrees to radians, then convert seconds to rotation angle
-	//	float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-	//	double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
-	//	float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
-
-	//	//Rotate(radians);
-	//}
 }
 
 // Rotate the 3D cube model a set amount of radians.
@@ -202,9 +176,13 @@ void Sample3DSceneRenderer::Render()
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	
-	Node* node = m_snake->listHead;
-	while (node != nullptr)
+	Node* snakeNode = m_snake->listHead;
+	for (int i = 0; i < m_snake->count; ++i)
 	{
+		if (snakeNode == nullptr)
+		{
+			continue;
+		}
 		// Prepare the constant buffer to send it to the graphics device.
 		context->UpdateSubresource(
 			m_constantBuffer.Get(),
@@ -249,8 +227,8 @@ void Sample3DSceneRenderer::Render()
 			nullptr,
 			0
 			);
-		 
-		XMMATRIX translation = XMMatrixTranslation((float)node->x, (float)node->y, 0.0f);		
+
+		XMMATRIX translation = XMMatrixTranslation((float)snakeNode->x, (float)snakeNode->y, 0.0f);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
 		// Send the constant buffer to the graphics device.
 		context->VSSetConstantBuffers(
@@ -265,8 +243,11 @@ void Sample3DSceneRenderer::Render()
 			0,
 			0
 			);
-		node = node->next;
+		
+		snakeNode = snakeNode->next;
+		
 	}
+	snakeNode = nullptr;
 }
 
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
@@ -403,6 +384,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 
 void Sample3DSceneRenderer::ReleaseDeviceDependentResources()
 {
+	m_snake.reset();
 	m_loadingComplete = false;
 	m_vertexShader.Reset();
 	m_inputLayout.Reset();
