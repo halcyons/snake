@@ -91,11 +91,13 @@ namespace Snake
 				DirectX::BoundingBox headBB;
 				switch (listHead->direction)
 				{
-				case Direction::up || Direction::down:
+				case Direction::up:
+				case Direction::down:
 					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
 						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
 					break;
 				case Direction::left:
+				case Direction::right:
 					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
 						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
 					break;
@@ -140,6 +142,8 @@ namespace Snake
 		void Move(int step);
 		void Move(int step, Direction direction);
 		void Move(float step, Direction direction, DirectX::XMFLOAT4X4 &matrix);
+
+		void GameInitialize();
 
 	private:
 		

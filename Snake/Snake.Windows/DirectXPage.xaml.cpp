@@ -111,7 +111,9 @@ void DirectXPage::SetGameOver()
 		CoreDispatcherPriority::Normal,
 		ref new DispatchedHandler([this]()
 	{
-		GameOverTB->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		m_main->StopRenderLoop();
+		
 	})
 		);
 	
@@ -186,22 +188,22 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
 	// When the pointer is pressed begin tracking the pointer movement.
-	m_main->StartTracking();
+	//m_main->StartTracking();
 }
 
 void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 {
-	// Update the pointer tracking code.
-	if (m_main->IsTracking())
-	{
-		m_main->TrackingUpdate(e->CurrentPoint->Position.X);
-	}
+	//// Update the pointer tracking code.
+	//if (m_main->IsTracking())
+	//{
+	//	m_main->TrackingUpdate(e->CurrentPoint->Position.X);
+	//}
 }
 
 void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 {
 	// Stop tracking pointer movement when the pointer is released.
-	m_main->StopTracking();
+	//m_main->StopTracking();
 }
 
 void DirectXPage::OnCompositionScaleChanged(SwapChainPanel^ sender, Object^ args)
@@ -231,4 +233,13 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		m_main->Move(1, Direction::left);
 	if (key == Windows::System::VirtualKey::D || key == Windows::System::VirtualKey::Right)		// right
 		m_main->Move(1, Direction::right);
+}
+
+
+void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+	m_main->GameInitialize();
+	m_main->StartRenderLoop();
+	
 }

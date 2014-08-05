@@ -24,8 +24,8 @@ void ::Snake::DirectXPage::InitializeComponent()
 
     // Get the SwapChainPanel named 'swapChainPanel'
     swapChainPanel = safe_cast<::Windows::UI::Xaml::Controls::SwapChainPanel^>(static_cast<Windows::UI::Xaml::IFrameworkElement^>(this)->FindName(L"swapChainPanel"));
-    // Get the TextBlock named 'GameOverTB'
-    GameOverTB = safe_cast<::Windows::UI::Xaml::Controls::TextBlock^>(static_cast<Windows::UI::Xaml::IFrameworkElement^>(this)->FindName(L"GameOverTB"));
+    // Get the Grid named 'overlayGrid'
+    overlayGrid = safe_cast<::Windows::UI::Xaml::Controls::Grid^>(static_cast<Windows::UI::Xaml::IFrameworkElement^>(this)->FindName(L"overlayGrid"));
 }
 
 void ::Snake::DirectXPage::Connect(int connectionId, Platform::Object^ target)
@@ -35,6 +35,10 @@ void ::Snake::DirectXPage::Connect(int connectionId, Platform::Object^ target)
     case 1:
         (safe_cast<::Windows::UI::Xaml::UIElement^>(target))->KeyDown +=
             ref new ::Windows::UI::Xaml::Input::KeyEventHandler(this, (void (::Snake::DirectXPage::*)(Platform::Object^, Windows::UI::Xaml::Input::KeyRoutedEventArgs^))&DirectXPage::Page_KeyDown);
+        break;
+    case 2:
+        (safe_cast<::Windows::UI::Xaml::Controls::Primitives::ButtonBase^>(target))->Click +=
+            ref new ::Windows::UI::Xaml::RoutedEventHandler(this, (void (::Snake::DirectXPage::*)(Platform::Object^, Windows::UI::Xaml::RoutedEventArgs^))&DirectXPage::Button_Click);
         break;
     }
     (void)connectionId; // Unused parameter

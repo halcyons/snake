@@ -63,6 +63,7 @@ namespace Snake
 		std::unique_ptr<Snake::SnakeMain> m_main; 
 		bool m_windowVisible;
 		void Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ e);
+		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }
 

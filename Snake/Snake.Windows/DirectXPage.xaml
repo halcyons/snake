@@ -8,9 +8,17 @@
     mc:Ignorable="d" KeyDown="Page_KeyDown">
 
     <SwapChainPanel x:Name="swapChainPanel">
-        <TextBlock Name="GameOverTB" Text="GameOver!"
+        <Grid Name="overlayGrid" Margin="500,200" Visibility="Collapsed" Background="#B2000000">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="GameOver!"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
-               FontSize="30" Visibility="Collapsed" />
+               FontSize="30"/>
+            <Button Grid.Row="1" Width="200" Height="50" HorizontalAlignment="Center" Click="Button_Click">Retry</Button>
+        </Grid>
+        
     </SwapChainPanel>
 </Page>

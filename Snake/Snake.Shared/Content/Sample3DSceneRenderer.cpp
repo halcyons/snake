@@ -17,15 +17,8 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_tracking(false),
 	m_deviceResources(deviceResources)
 {
-	 
-
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
-	m_snake = std::make_unique<List>();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
+	GameInitialize();
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
@@ -76,6 +69,19 @@ void Sample3DSceneRenderer::Move(float step, Direction direction, DirectX::XMFLO
 		break;
 	}
 	XMStoreFloat4x4(&matrix, XMMatrixMultiply(model, translation));
+}
+
+void Sample3DSceneRenderer::GameInitialize()
+{
+	if (m_snake != nullptr)
+	{
+		m_snake.release();
+	}
+	m_snake = std::make_unique<List>();
+	m_snake->AddHeader();
+	m_snake->AddHeader();
+	m_snake->AddHeader();
+	m_snake->AddHeader();
 }
 
 // Initializes view parameters when the window size changes.
