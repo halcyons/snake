@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "SnakeMain.h"
 #include "Common\DirectXHelper.h"
+#include "DirectXPage.xaml.h"
 
 using namespace Snake;
 using namespace Windows::Foundation;
@@ -9,7 +10,7 @@ using namespace Concurrency;
 
 // Loads and initializes application assets when the application is loaded.
 SnakeMain::SnakeMain(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
+m_deviceResources(deviceResources), m_pointerLocationX(0.0f), m_isGameOver(false)
 {
 	// Register to be notified if the Device is lost or recreated
 	m_deviceResources->RegisterDeviceNotify(this);
@@ -59,6 +60,10 @@ void SnakeMain::StartRenderLoop()
 			if (Render())
 			{
 				m_deviceResources->Present();
+				if (m_isGameOver)
+				{
+					DirectXPage::Current->SetGameOver();
+				}
 			}
 		}
 	});
@@ -119,9 +124,15 @@ bool SnakeMain::Render()
 
 	// Render the scene objects.
 	// TODO: Replace this with your app's content rendering functions.
-	m_sceneRenderer->Render();
 	m_fpsTextRenderer->Render();
-
+	if (!m_sceneRenderer->Render())
+	{
+		m_isGameOver = false;
+	}	
+	else
+	{
+		m_isGameOver = true;
+	}
 	return true;
 }
 

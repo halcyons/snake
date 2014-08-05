@@ -24,11 +24,18 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace concurrency;
 
+
+DirectXPage^ DirectXPage::current = nullptr;
+
 DirectXPage::DirectXPage():
 	m_windowVisible(true),
 	m_coreInput(nullptr)
 {
 	InitializeComponent();
+
+	// This is a static public property that allows downstream pages to get a handle to the MainPage instance 
+	// in order to call methods that are in this class. 
+	DirectXPage::current = this;
 
 	// Register event handlers for page lifecycle.
 	CoreWindow^ window = Window::Current->CoreWindow;

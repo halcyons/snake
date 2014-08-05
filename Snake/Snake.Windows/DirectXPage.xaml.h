@@ -24,7 +24,15 @@ namespace Snake
 		void SaveInternalState(Windows::Foundation::Collections::IPropertySet^ state);
 		void LoadInternalState(Windows::Foundation::Collections::IPropertySet^ state);
 
+		void SetGameOver();
+	internal:
+		static property DirectXPage^ Current
+		{
+			DirectXPage^ get(){ return current; }
+			void set(DirectXPage^ value){ current = value; }
+		}
 	private:
+		static DirectXPage^ current;
 		// XAML low-level rendering event handler.
 		void OnRendering(Platform::Object^ sender, Platform::Object^ args);
 

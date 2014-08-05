@@ -86,15 +86,29 @@ namespace Snake
 		bool IsIntersectWithBody()
 		{
 			bool is = false;
-			if (listHead->next != nullptr)
+			if (listHead->next->next != nullptr)
 			{
-				DirectX::BoundingBox headBB = listHead->boundingBox;
-				Node* tempNode = listHead->next;
-				DirectX::BoundingBox tempBB = tempNode->boundingBox;
+				DirectX::BoundingBox headBB;
+				switch (listHead->direction)
+				{
+				case Direction::up || Direction::down:
+					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
+						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
+					break;
+				case Direction::left:
+					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
+						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
+					break;
+				default:
+					break;
+				}
+				Node* tempNode = listHead->next->next;
 
 				while (tempNode != nullptr)
 				{
-					if (headBB.Intersects(tempBB))
+					DirectX::BoundingBox tempBB = tempNode->boundingBox;
+					if (headBB.Contains(tempBB) == DirectX::ContainmentType::INTERSECTS ||
+						headBB.Contains(tempBB) == DirectX::ContainmentType::CONTAINS)
 					{
 						is = true;
 						break;
@@ -103,6 +117,7 @@ namespace Snake
 				}
 				tempNode = nullptr;
 			}
+			return is;
 			
 		}
 	};
@@ -115,7 +130,7 @@ namespace Snake
 		void CreateWindowSizeDependentResources();
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
-		void Render();
+		bool Render();
 		void StartTracking();
 		void TrackingUpdate(float positionX);
 		void StopTracking();
@@ -131,7 +146,7 @@ namespace Snake
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
 
-	private:	
+	private:
 
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;

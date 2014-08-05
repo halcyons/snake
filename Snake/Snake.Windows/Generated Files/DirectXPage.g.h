@@ -13,7 +13,7 @@ namespace Windows {
         namespace Xaml {
             namespace Controls {
                 ref class SwapChainPanel;
-                ref class AppBar;
+                ref class TextBlock;
             }
         }
     }
@@ -32,7 +32,7 @@ namespace Snake
         bool _contentLoaded;
     
         private: ::Windows::UI::Xaml::Controls::SwapChainPanel^ swapChainPanel;
-        private: ::Windows::UI::Xaml::Controls::AppBar^ bottomAppBar;
+        private: ::Windows::UI::Xaml::Controls::TextBlock^ GameOverTB;
     };
 }
 

@@ -24,11 +24,17 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace concurrency;
 
+DirectXPage^ DirectXPage::current = nullptr;
+
 DirectXPage::DirectXPage():
 	m_windowVisible(true),
 	m_coreInput(nullptr)
 {
 	InitializeComponent();
+
+	// This is a static public property that allows downstream pages to get a handle to the MainPage instance 
+	// in order to call methods that are in this class. 
+	DirectXPage::current = this;
 
 	// Register event handlers for page lifecycle.
 	CoreWindow^ window = Window::Current->CoreWindow;
@@ -94,6 +100,21 @@ DirectXPage::~DirectXPage()
 	// Stop rendering and processing events on destruction.
 	m_main->StopRenderLoop();
 	m_coreInput->Dispatcher->StopProcessEvents();
+}
+
+void DirectXPage::SetGameOver()
+{
+
+	// This function may be called from a different thread. 
+	// All XAML updates need to occur on the UI thread so dispatch to ensure this is true. 
+	Dispatcher->RunAsync(
+		CoreDispatcherPriority::Normal,
+		ref new DispatchedHandler([this]()
+	{
+		GameOverTB->Visibility = Windows::UI::Xaml::Visibility::Visible;
+	})
+		);
+	
 }
 
 // Saves the current state of the app for suspend and terminate events.
