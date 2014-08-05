@@ -123,6 +123,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	XMMATRIX orientationMatrix = XMLoadFloat4x4(&orientation);
 
+
 	XMStoreFloat4x4(
 		&m_constantBufferData.projection,
 		perspectiveMatrix * orientationMatrix
