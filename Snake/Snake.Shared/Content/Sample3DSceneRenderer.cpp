@@ -84,6 +84,11 @@ void Sample3DSceneRenderer::GameInitialize()
 	m_snake->AddHeader();
 }
 
+void Sample3DSceneRenderer::ScrollViewMatrix()
+{
+
+}
+
 // Initializes view parameters when the window size changes.
 void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 {

@@ -185,6 +185,7 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 	// then fill in event handlers (like this one).
 }
 
+
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
 	// When the pointer is pressed begin tracking the pointer movement.
@@ -240,6 +241,12 @@ void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::Rout
 {
 	overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 	m_main->GameInitialize();
-	m_main->StartRenderLoop();
-	
+	m_main->StartRenderLoop();	
+}
+
+
+
+void Snake::DirectXPage::Page_PointerWheelChanged(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+
 }

@@ -35,6 +35,8 @@ void ::Snake::DirectXPage::Connect(int connectionId, Platform::Object^ target)
     case 1:
         (safe_cast<::Windows::UI::Xaml::UIElement^>(target))->KeyDown +=
             ref new ::Windows::UI::Xaml::Input::KeyEventHandler(this, (void (::Snake::DirectXPage::*)(Platform::Object^, Windows::UI::Xaml::Input::KeyRoutedEventArgs^))&DirectXPage::Page_KeyDown);
+        (safe_cast<::Windows::UI::Xaml::UIElement^>(target))->PointerWheelChanged +=
+            ref new ::Windows::UI::Xaml::Input::PointerEventHandler(this, (void (::Snake::DirectXPage::*)(Platform::Object^, Windows::UI::Xaml::Input::PointerRoutedEventArgs^))&DirectXPage::Page_PointerWheelChanged);
         break;
     case 2:
         (safe_cast<::Windows::UI::Xaml::Controls::Primitives::ButtonBase^>(target))->Click +=

@@ -145,6 +145,8 @@ namespace Snake
 
 		void GameInitialize();
 
+		void ScrollViewMatrix();
+
 	private:
 		
 		void Rotate(float radians);
