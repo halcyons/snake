@@ -39,6 +39,10 @@ DirectXPage::DirectXPage():
 	// Register event handlers for page lifecycle.
 	CoreWindow^ window = Window::Current->CoreWindow;
 
+	//this->AddHandler(UIElement::PointerWheelChangedEvent, ref new PointerEventHandler(this, &DirectXPage::OnWheelChanged), true);
+
+	window->PointerWheelChanged += ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &DirectXPage::OnWheelChanged);
+
 	window->VisibilityChanged +=
 		ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &DirectXPage::OnVisibilityChanged);
 
@@ -100,6 +104,11 @@ DirectXPage::~DirectXPage()
 	// Stop rendering and processing events on destruction.
 	m_main->StopRenderLoop();
 	m_coreInput->Dispatcher->StopProcessEvents();
+}
+
+void DirectXPage::OnWheelChanged(CoreWindow^ sender, PointerEventArgs^ e)
+{
+	Windows::Foundation::Point pt = e->CurrentPoint->Position;
 }
 
 void DirectXPage::SetGameOver()
@@ -244,9 +253,3 @@ void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::Rout
 	m_main->StartRenderLoop();	
 }
 
-
-
-void Snake::DirectXPage::Page_PointerWheelChanged(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
-{
-
-}

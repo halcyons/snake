@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" 
-    KeyDown="Page_KeyDown" PointerWheelChanged="Page_PointerWheelChanged">
+    KeyDown="Page_KeyDown">
 
     <SwapChainPanel x:Name="swapChainPanel">
         <Grid Name="overlayGrid" Margin="500,200" Visibility="Collapsed" Background="#B2000000">
@@ -20,6 +20,7 @@
                FontSize="30"/>
             <Button Grid.Row="1" Width="200" Height="50" HorizontalAlignment="Center" Click="Button_Click">Retry</Button>
         </Grid>
-        
+
     </SwapChainPanel>
+
 </Page>
