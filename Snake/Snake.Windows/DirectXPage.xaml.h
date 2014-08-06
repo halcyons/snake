@@ -33,6 +33,8 @@ namespace Snake
 		}
 	private:
 		static DirectXPage^ current;
+
+		bool m_isNeedRender;
 		// XAML low-level rendering event handler.
 		void OnRendering(Platform::Object^ sender, Platform::Object^ args);
 

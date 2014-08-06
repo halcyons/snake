@@ -28,7 +28,8 @@ DirectXPage^ DirectXPage::current = nullptr;
 
 DirectXPage::DirectXPage():
 	m_windowVisible(true),
-	m_coreInput(nullptr)
+	m_coreInput(nullptr),
+	m_isNeedRender(true)
 {
 	InitializeComponent();
 
@@ -96,15 +97,35 @@ DirectXPage::DirectXPage():
 	m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 
 	m_main = std::unique_ptr<SnakeMain>(new SnakeMain(m_deviceResources));
-	m_main->StartRenderLoop();
+	//m_main->StartRenderLoop();
+
+	CompositionTarget::Rendering::add(ref new EventHandler<Object^>(this, &DirectXPage::OnRendering));
 }
 
 DirectXPage::~DirectXPage()
 {
 	// Stop rendering and processing events on destruction.
-	m_main->StopRenderLoop();
+	m_isNeedRender = false;
 	m_coreInput->Dispatcher->StopProcessEvents();
 }
+
+
+void DirectXPage::OnRendering(Object^ sender, Object^ args)
+{
+	if (m_isNeedRender)
+	{
+		m_main->Update();
+		if (m_main->Render())
+		{
+			m_deviceResources->Present();
+			if (m_main->m_isGameOver)
+			{
+				SetGameOver();
+			}
+		}
+	}	
+}
+
 
 void DirectXPage::OnWheelChanged(CoreWindow^ sender, PointerEventArgs^ e)
 {
@@ -121,7 +142,7 @@ void DirectXPage::SetGameOver()
 		ref new DispatchedHandler([this]()
 	{
 		overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
-		m_main->StopRenderLoop();
+		m_isNeedRender = false;		
 		
 	})
 		);
@@ -131,11 +152,10 @@ void DirectXPage::SetGameOver()
 // Saves the current state of the app for suspend and terminate events.
 void DirectXPage::SaveInternalState(IPropertySet^ state)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->Trim();
 
 	// Stop rendering when the app is suspended.
-	m_main->StopRenderLoop();
+	m_isNeedRender = false;
 
 	// Put code to save app state here.
 }
@@ -146,7 +166,7 @@ void DirectXPage::LoadInternalState(IPropertySet^ state)
 	// Put code to load app state here.
 
 	// Start rendering when the app is resumed.
-	m_main->StartRenderLoop();
+	m_isNeedRender = true;
 }
 
 // Window event handlers.
@@ -156,11 +176,11 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 	m_windowVisible = args->Visible;
 	if (m_windowVisible)
 	{
-		m_main->StartRenderLoop();
+		m_isNeedRender = true;
 	}
 	else
 	{
-		m_main->StopRenderLoop();
+		m_isNeedRender = false;
 	}
 }
 
@@ -168,14 +188,12 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 
 void DirectXPage::OnDpiChanged(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->SetDpi(sender->LogicalDpi);
 	m_main->CreateWindowSizeDependentResources();
 }
 
 void DirectXPage::OnOrientationChanged(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->SetCurrentOrientation(sender->CurrentOrientation);
 	m_main->CreateWindowSizeDependentResources();
 }
@@ -183,7 +201,6 @@ void DirectXPage::OnOrientationChanged(DisplayInformation^ sender, Object^ args)
 
 void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->ValidateDevice();
 }
 
@@ -218,14 +235,12 @@ void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 
 void DirectXPage::OnCompositionScaleChanged(SwapChainPanel^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
 	m_main->CreateWindowSizeDependentResources();
 }
 
 void DirectXPage::OnSwapChainPanelSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
 	m_deviceResources->SetLogicalSize(e->NewSize);
 	m_main->CreateWindowSizeDependentResources();
 }
@@ -250,6 +265,6 @@ void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::Rout
 {
 	overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 	m_main->GameInitialize();
-	m_main->StartRenderLoop();	
+	m_isNeedRender = true;
 }
 

@@ -86,7 +86,7 @@ namespace Snake
 		bool IsIntersectWithBody()
 		{
 			bool is = false;
-			if (listHead->next->next != nullptr)
+			if (count > 3)
 			{
 				DirectX::BoundingBox headBB;
 				switch (listHead->direction)
@@ -104,7 +104,7 @@ namespace Snake
 				default:
 					break;
 				}
-				Node* tempNode = listHead->next->next;
+				Node* tempNode = listHead->next->next->next;
 
 				while (tempNode != nullptr)
 				{
@@ -141,7 +141,6 @@ namespace Snake
 		
 		void Move(int step);
 		void Move(int step, Direction direction);
-		void Move(float step, Direction direction, DirectX::XMFLOAT4X4 &matrix);
 
 		void GameInitialize();
 

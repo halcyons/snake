@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "SnakeMain.h"
 #include "Common\DirectXHelper.h"
-#include "DirectXPage.xaml.h"
+
 
 using namespace Snake;
 using namespace Windows::Foundation;
@@ -39,42 +39,6 @@ void SnakeMain::CreateWindowSizeDependentResources()
 {
 	// TODO: Replace this with the size-dependent initialization of your app's content.
 	m_sceneRenderer->CreateWindowSizeDependentResources();
-}
-
-void SnakeMain::StartRenderLoop()
-{
-	// If the animation render loop is already running then do not start another thread.
-	if (m_renderLoopWorker != nullptr && m_renderLoopWorker->Status == AsyncStatus::Started)
-	{
-		return;
-	}
-
-	// Create a task that will be run on a background thread.
-	auto workItemHandler = ref new WorkItemHandler([this](IAsyncAction ^ action)
-	{
-		// Calculate the updated frame and render once per vertical blanking interval.
-		while (action->Status == AsyncStatus::Started)
-		{
-			critical_section::scoped_lock lock(m_criticalSection);
-			Update();
-			if (Render())
-			{
-				m_deviceResources->Present();
-				if (m_isGameOver)
-				{
-					DirectXPage::Current->SetGameOver();
-				}
-			}
-		}
-	});
-
-	// Run task on a dedicated high priority background thread.
-	m_renderLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
-}
-
-void SnakeMain::StopRenderLoop()
-{
-	m_renderLoopWorker->Cancel();
 }
 
 // Updates the application state once per frame.
@@ -135,6 +99,7 @@ bool SnakeMain::Render()
 	}
 	return true;
 }
+
 
 // Notifies renderers that device resources need to be released.
 void SnakeMain::OnDeviceLost()

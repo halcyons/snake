@@ -19,20 +19,20 @@ namespace Snake
 		void StopTracking() { m_sceneRenderer->StopTracking(); }
 		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
 		void GameInitialize() { m_sceneRenderer->GameInitialize(); }
-		void StartRenderLoop();
-		void StopRenderLoop();
-		Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
 
+		void Update();
+		bool Render();
+
+		
 		void Move(int step, Direction direction) { m_sceneRenderer->Move(step, direction); }
 
 		// IDeviceNotify
 		virtual void OnDeviceLost();
 		virtual void OnDeviceRestored();
-
+		bool m_isGameOver;
 	private:
 		void ProcessInput();
-		void Update();
-		bool Render();
+		
 
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
@@ -41,15 +41,12 @@ namespace Snake
 		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
 		std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
 
-		Windows::Foundation::IAsyncAction^ m_renderLoopWorker;
-		Concurrency::critical_section m_criticalSection;
-
 		// Rendering loop timer.
 		DX::StepTimer m_timer;
 
 		// Track current input pointer position.
 		float m_pointerLocationX;
 
-		bool m_isGameOver;
+		
 	};
 }

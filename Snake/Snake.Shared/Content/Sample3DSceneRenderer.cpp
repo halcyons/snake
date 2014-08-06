@@ -46,31 +46,6 @@ void Sample3DSceneRenderer::Move(int step, Direction direction)
 }
 
 
-// Move specific model matrix
-void Sample3DSceneRenderer::Move(float step, Direction direction, DirectX::XMFLOAT4X4& matrix)
-{
-	XMMATRIX model = XMLoadFloat4x4(&matrix);
-	XMMATRIX translation = XMMatrixIdentity();
-	switch (direction)
-	{
-	case Direction::up:
-		translation = XMMatrixTranslation(0.0f, step, 0.0f);		
-		break;
-	case Direction::right:
-		translation = XMMatrixTranslation(step, 0.0f, 0.0f);
-		break;
-	case Direction::down:
-		translation = XMMatrixTranslation(0.0f, -step, 0.0f);
-		break;
-	case Direction::left:
-		translation = XMMatrixTranslation(-step, 0.0f, 0.0f);
-		break;
-	default:
-		break;
-	}
-	XMStoreFloat4x4(&matrix, XMMatrixMultiply(model, translation));
-}
-
 void Sample3DSceneRenderer::GameInitialize()
 {
 	if (m_snake != nullptr)
