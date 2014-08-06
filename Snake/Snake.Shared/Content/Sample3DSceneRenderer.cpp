@@ -4,6 +4,7 @@
 #include "..\Common\DirectXHelper.h"
 #include "math.h"
 #include "Common\WICTextureLoader.h"
+#include <random>
 using namespace Snake;
 
 using namespace DirectX;
@@ -16,7 +17,8 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_indexCount(0),
 	m_foodIndexCount(0),
 	m_tracking(false),
-	m_deviceResources(deviceResources)
+	m_deviceResources(deviceResources),
+	m_isNeedChangePos(true)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	GameInitialize();
@@ -156,8 +158,29 @@ void Sample3DSceneRenderer::StopTracking()
 	m_tracking = false;
 }
 
+Point Sample3DSceneRenderer::RandomPosition(int min, int max)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(min, max);
+	return Point((float)dis(gen), (float)dis(gen));
+}
+
 bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 {
+	static Point pt(0.0f, 0.0f);
+	
+	if (m_isNeedChangePos)
+	{
+		do
+		{
+			pt = RandomPosition(-10, 10);
+			m_foodBB = BoundingBox(XMFLOAT3(pt.X, pt.Y, 0.0f),
+				XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
+		} while ((m_snake->IsIntersectWithBB(m_foodBB)));
+		m_isNeedChangePos = false;
+	}
+	
 
 	// Each vertex is one instance of the FoodVertex struct.
 	UINT stride = sizeof(FoodVertex);
@@ -202,7 +225,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		m_samplerState.GetAddressOf()
 		);
 
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranslation(5.0f, 0.0f, 0.0f));
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranslation(pt.X, pt.Y, 0.0f));
 
 	// Prepare the constant buffer to send it to the graphics device.
 	context->UpdateSubresource(
@@ -228,6 +251,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		0,
 		0
 		);
+
 	return true;
 }
 
@@ -324,7 +348,11 @@ bool Sample3DSceneRenderer::Render()
 		snakeNode = snakeNode->next;		
 	}
 	snakeNode = nullptr;
-
+	if (m_snake->IsIntersectWithBB(m_foodBB))
+	{
+		m_snake->AddHeader();
+		m_isNeedChangePos = true;
+	}
 	if (m_snake->IsIntersectWithBody())
 	{
 		return true;
