@@ -133,6 +133,7 @@ namespace Snake
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
 		bool Render();
+		
 		void StartTracking();
 		void TrackingUpdate(float positionX);
 		void StopTracking();
@@ -147,7 +148,7 @@ namespace Snake
 		void ScrollViewMatrix();
 
 	private:
-		
+		bool RenderFood(ID3D11DeviceContext* context);
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
 
@@ -164,11 +165,22 @@ namespace Snake
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
 
+		// Food resources.
+		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_foodInputLayout;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodVertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodIndexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_foodVertexShader;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_foodPixelShader;
+
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_foodSRV;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState>		m_samplerState;
+
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 
 		DirectX::XMFLOAT4X4 m_model;
 		uint32	m_indexCount;
+		uint32  m_foodIndexCount;
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;

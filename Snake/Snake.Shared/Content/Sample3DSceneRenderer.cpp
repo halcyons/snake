@@ -3,7 +3,7 @@
 
 #include "..\Common\DirectXHelper.h"
 #include "math.h"
-
+#include "Common\WICTextureLoader.h"
 using namespace Snake;
 
 using namespace DirectX;
@@ -14,6 +14,7 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
+	m_foodIndexCount(0),
 	m_tracking(false),
 	m_deviceResources(deviceResources)
 {
@@ -155,6 +156,81 @@ void Sample3DSceneRenderer::StopTracking()
 	m_tracking = false;
 }
 
+bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
+{
+
+	// Each vertex is one instance of the FoodVertex struct.
+	UINT stride = sizeof(FoodVertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(
+		0,
+		1,
+		m_foodVertexBuffer.GetAddressOf(),
+		&stride,
+		&offset
+		);
+
+	context->IASetIndexBuffer(
+		m_foodIndexBuffer.Get(),
+		DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
+		0
+		);
+
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	context->IASetInputLayout(m_foodInputLayout.Get());
+
+	// Attach our vertex shader.
+	context->VSSetShader(
+		m_foodVertexShader.Get(),
+		nullptr,
+		0
+		);
+
+	// Attach our pixel shader.
+	context->PSSetShader(
+		m_foodPixelShader.Get(),
+		nullptr,
+		0
+		);
+
+	context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
+
+	context->PSSetSamplers(
+		0,                          // starting at the first sampler slot 
+		1,                          // set one sampler binding 
+		m_samplerState.GetAddressOf()
+		);
+
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranslation(5.0f, 0.0f, 0.0f));
+
+	// Prepare the constant buffer to send it to the graphics device.
+	context->UpdateSubresource(
+		m_constantBuffer.Get(),
+		0,
+		NULL,
+		&m_constantBufferData,
+		0,
+		0
+		);
+
+
+	// Send the constant buffer to the graphics device.
+	context->VSSetConstantBuffers(
+		0,
+		1,
+		m_constantBuffer.GetAddressOf()
+		);
+
+	// Draw the objects.
+	context->DrawIndexed(
+		m_foodIndexCount,
+		0,
+		0
+		);
+	return true;
+}
+
 // Renders one frame using the vertex and pixel shaders.
 bool Sample3DSceneRenderer::Render()
 {
@@ -166,6 +242,9 @@ bool Sample3DSceneRenderer::Render()
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	
+
+	RenderFood(context);
+
 	Node* snakeNode = m_snake->listHead;
 	for (int i = 0; i < m_snake->count; ++i)
 	{
@@ -173,15 +252,7 @@ bool Sample3DSceneRenderer::Render()
 		{
 			continue;
 		}
-		// Prepare the constant buffer to send it to the graphics device.
-		context->UpdateSubresource(
-			m_constantBuffer.Get(),
-			0,
-			NULL,
-			&m_constantBufferData,
-			0,
-			0
-			);
+		
 
 		// Each vertex is one instance of the VertexPositionColor struct.
 		UINT stride = sizeof(VertexPositionColor);
@@ -224,6 +295,16 @@ bool Sample3DSceneRenderer::Render()
 		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
 			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
 		boundingBox.Transform(snakeNode->boundingBox, XMLoadFloat4x4(&m_constantBufferData.model));
+
+		// Prepare the constant buffer to send it to the graphics device.
+		context->UpdateSubresource(
+			m_constantBuffer.Get(),
+			0,
+			NULL,
+			&m_constantBufferData,
+			0,
+			0
+			);
 		
 		
 		// Send the constant buffer to the graphics device.
@@ -319,15 +400,13 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			{XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
 			{XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
 			{XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f)},
+
 			{XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
 			{XMFLOAT3( 0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f)},
 			{XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
 			{XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 		};
 	
-
-		
-
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
 		vertexBufferData.pSysMem = cubeVertices;
 		vertexBufferData.SysMemPitch = 0;
@@ -383,10 +462,178 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			);
 	});
 
+
+	// Food vertex initialization.
+	auto LoadFoodVS = DX::ReadDataAsync(L"FoodVertexShader.cso");
+	auto LoadFoodPS = DX::ReadDataAsync(L"FoodPixelShader.cso");
+
+	auto createFoodVS = LoadFoodVS.then([this](const std::vector<byte>& fileData){
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateVertexShader(
+			&fileData[0],
+			fileData.size(),
+			nullptr,
+			&m_foodVertexShader
+			)
+			);
+
+		static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateInputLayout(
+			vertexDesc,
+			ARRAYSIZE(vertexDesc),
+			&fileData[0],
+			fileData.size(),
+			&m_foodInputLayout
+			)
+			);
+	});
+	
+	auto createFoodPS = LoadFoodPS.then([this](const std::vector<byte>& fileData) {
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreatePixelShader(
+			&fileData[0],
+			fileData.size(),
+			nullptr,
+			&m_foodPixelShader
+			)
+			);		
+	});
+
+	auto createFoodCube = (createFoodVS && createFoodPS).then([this](){
+		static const FoodVertex cubeVertices[] =
+		{
+			// -z
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f),  XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
+
+			// +z
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+
+			// +y
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
+
+			// -y
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+
+			// -x
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
+
+			// +x
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+		};
+
+		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+		vertexBufferData.pSysMem = cubeVertices;
+		vertexBufferData.SysMemPitch = 0;
+		vertexBufferData.SysMemSlicePitch = 0;
+		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateBuffer(
+			&vertexBufferDesc,
+			&vertexBufferData,
+			&m_foodVertexBuffer
+			)
+			);
+
+		static const unsigned short cubeIndices[] =
+		{
+			// Front Face
+			0, 1, 2,
+			0, 2, 3,
+
+			// Back Face
+			4, 5, 6,
+			4, 6, 7,
+
+			// Top Face
+			8, 9, 10,
+			8, 10, 11,
+
+			// Bottom Face
+			12, 13, 14,
+			12, 14, 15,
+
+			// Left Face
+			16, 17, 18,
+			16, 18, 19,
+
+			// Right Face
+			20, 21, 22,
+			20, 22, 23
+		};
+
+		m_foodIndexCount = ARRAYSIZE(cubeIndices);
+
+		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+		indexBufferData.pSysMem = cubeIndices;
+		indexBufferData.SysMemPitch = 0;
+		indexBufferData.SysMemSlicePitch = 0;
+		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateBuffer(
+			&indexBufferDesc,
+			&indexBufferData,
+			&m_foodIndexBuffer
+			)
+			);
+	});
+
 	// Once the cube is loaded, the object is ready to be rendered.
-	createCubeTask.then([this] () {
+	(createFoodCube && createCubeTask).then([this]() {
 		m_loadingComplete = true;
 	});
+
+	auto device = m_deviceResources->GetD3DDevice();
+
+	// Create the sampler state
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.BorderColor[0] = 0.0f;
+	samplerDesc.BorderColor[1] = 0.0f;
+	samplerDesc.BorderColor[2] = 0.0f;
+	samplerDesc.BorderColor[3] = 0.0f;
+
+	// Allow use of all mip levels 
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	DX::ThrowIfFailed(
+		device->CreateSamplerState(
+		&samplerDesc,
+		&m_samplerState)
+		);
+
+	Microsoft::WRL::ComPtr<ID3D11Resource> texture;
+	DirectX::CreateWICTextureFromFile(device, m_deviceResources->GetD3DDeviceContext(), L"head.jpg", &texture, &m_foodSRV);
 }
 
 void Sample3DSceneRenderer::ReleaseDeviceDependentResources()
