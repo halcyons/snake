@@ -45,10 +45,10 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)FoodVertexShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodPixelShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)FoodPixelShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
   </ItemGroup>
