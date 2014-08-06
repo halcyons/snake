@@ -154,5 +154,8 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-/Snake/Snake.WindowsPhone/Generated Files
-/Snake/Snake.Windows/Generated Files
+/Snake/Snake.WindowsPhone/Generated Files/App.xaml
+/Snake/Snake.WindowsPhone/Generated Files/App.xbf
+/Snake/Snake.WindowsPhone/Generated Files/DirectXPage.xaml
+/Snake/Snake.WindowsPhone/Generated Files/DirectXPage.xbf
+/Snake/Snake.WindowsPhone/Generated Files/XamlTypeInfo.g.cpp

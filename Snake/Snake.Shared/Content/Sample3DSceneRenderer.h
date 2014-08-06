@@ -122,27 +122,6 @@ namespace Snake
 			return is;
 			
 		}
-
-		bool IsIntersectWithBB(DirectX::BoundingBox bb)
-		{
-			DirectX::BoundingBox headBB;
-			switch (listHead->direction)
-			{
-			case Direction::up:
-			case Direction::down:
-				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
-				break;
-			case Direction::left:
-			case Direction::right:
-				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
-				break;
-			default:
-				break;
-			}
-			return headBB.Intersects(bb);
-		}
 	};
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
@@ -169,13 +148,9 @@ namespace Snake
 		void ScrollViewMatrix();
 
 	private:
-		Windows::Foundation::Point RandomPosition(int min, int max);
 		bool RenderFood(ID3D11DeviceContext* context);
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
-		bool m_isNeedChangePos;
-
-		DirectX::BoundingBox m_foodBB;
 
 	private:
 
