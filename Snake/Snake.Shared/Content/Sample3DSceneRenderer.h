@@ -86,7 +86,7 @@ namespace Snake
 		bool IsIntersectWithBody()
 		{
 			bool is = false;
-			if (listHead->next->next != nullptr)
+			if (count > 3)
 			{
 				DirectX::BoundingBox headBB;
 				switch (listHead->direction)
@@ -104,7 +104,7 @@ namespace Snake
 				default:
 					break;
 				}
-				Node* tempNode = listHead->next->next;
+				Node* tempNode = listHead->next->next->next;
 
 				while (tempNode != nullptr)
 				{
@@ -122,6 +122,27 @@ namespace Snake
 			return is;
 			
 		}
+
+		bool IsIntersectWithBB(DirectX::BoundingBox bb)
+		{
+			DirectX::BoundingBox headBB;
+			switch (listHead->direction)
+			{
+			case Direction::up:
+			case Direction::down:
+				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
+					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
+				break;
+			case Direction::left:
+			case Direction::right:
+				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
+					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
+				break;
+			default:
+				break;
+			}
+			return headBB.Intersects(bb);
+		}
 	};
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
@@ -133,6 +154,7 @@ namespace Snake
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
 		bool Render();
+		
 		void StartTracking();
 		void TrackingUpdate(float positionX);
 		void StopTracking();
@@ -141,16 +163,19 @@ namespace Snake
 		
 		void Move(int step);
 		void Move(int step, Direction direction);
-		void Move(float step, Direction direction, DirectX::XMFLOAT4X4 &matrix);
 
 		void GameInitialize();
 
 		void ScrollViewMatrix();
 
 	private:
-		
+		Windows::Foundation::Point RandomPosition(int min, int max);
+		bool RenderFood(ID3D11DeviceContext* context);
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
+		bool m_isNeedChangePos;
+
+		DirectX::BoundingBox m_foodBB;
 
 	private:
 
@@ -165,11 +190,22 @@ namespace Snake
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
 
+		// Food resources.
+		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_foodInputLayout;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodVertexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodIndexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_foodVertexShader;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_foodPixelShader;
+
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_foodSRV;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState>		m_samplerState;
+
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 
 		DirectX::XMFLOAT4X4 m_model;
 		uint32	m_indexCount;
+		uint32  m_foodIndexCount;
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;

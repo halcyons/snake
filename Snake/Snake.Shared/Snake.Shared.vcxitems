@@ -14,6 +14,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
@@ -36,8 +38,17 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
       <ShaderType>Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)FoodPixelShader.hlsl">
+      <ShaderType>Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)FoodVertexShader.hlsl">
+      <ShaderType>Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
   </ItemGroup>
 </Project>

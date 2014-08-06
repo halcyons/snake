@@ -4,6 +4,41 @@
 
 namespace DX
 {
+
+	// Helper sets a D3D resource name string (used by PIX and debug layer leak reporting).
+	template<UINT TNameLength>
+	inline void SetDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char(&name)[TNameLength])
+	{
+#if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
+		resource->SetPrivateData(WKPDID_D3DDebugObjectName, TNameLength - 1, name);
+#else
+		UNREFERENCED_PARAMETER(resource);
+		UNREFERENCED_PARAMETER(name);
+#endif
+	}
+
+	// Helper for output debug tracing
+	inline void DebugTrace(_In_z_ _Printf_format_string_ const char* format, ...)
+	{
+#ifdef _DEBUG
+		va_list args;
+		va_start(args, format);
+
+		char buff[1024];
+		vsprintf_s(buff, format, args);
+		OutputDebugStringA(buff);
+#else
+		UNREFERENCED_PARAMETER(format);
+#endif
+	}
+
+	// Helper smart-pointers
+	struct handle_closer { void operator()(HANDLE h) { if (h) CloseHandle(h); } };
+
+	typedef public std::unique_ptr<void, handle_closer> ScopedHandle;
+
+	inline HANDLE safe_handle(HANDLE h) { return (h == INVALID_HANDLE_VALUE) ? 0 : h; }
+
 	inline void ThrowIfFailed(HRESULT hr)
 	{
 		if (FAILED(hr))
