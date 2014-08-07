@@ -87,66 +87,32 @@ namespace Snake
 		}
 
 		// 
-		bool IsIntersectWithBody()
+		bool IsCollideWithBody()
 		{
 			bool is = false;
 			if (count > 3)
-			{
-				DirectX::BoundingBox headBB;
-				switch (listHead->direction)
-				{
-				case Direction::up:
-				case Direction::down:
-					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
-					break;
-				case Direction::left:
-				case Direction::right:
-					headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-						DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
-					break;
-				default:
-					break;
-				}
-				Node* tempNode = listHead->next->next->next;
+			{		
+				Node* start = listHead->next->next->next;
 
-				while (tempNode != nullptr)
-				{
-					DirectX::BoundingBox tempBB = tempNode->boundingBox;
-					if (headBB.Contains(tempBB) == DirectX::ContainmentType::INTERSECTS ||
-						headBB.Contains(tempBB) == DirectX::ContainmentType::CONTAINS)
-					{
-						is = true;
-						break;
-					}
-					tempNode = tempNode->next;
-				}
-				tempNode = nullptr;
+				is = IsCollideWithBB(listHead->boundingBox, start, listEnd);
 			}
 			return is;
 			
+		}		
+
+		bool IsCollideWithBB(DirectX::BoundingBox bb, Node* start, Node* end)
+		{			
+			Node* tempNode = start;
+			DirectX::BoundingBox tempBB(bb.Center, DirectX::XMFLOAT3(bb.Extents.x / 2, bb.Extents.y/ 2, bb.Extents.z / 2));
+			while (tempNode != end->next)
+			{
+				if (tempNode->boundingBox.Contains(tempBB) == DirectX::ContainmentType::CONTAINS)
+					return true;
+				tempNode = tempNode->next;
+			}			
+			return false;
 		}
 
-		bool IsIntersectWithBB(DirectX::BoundingBox bb)
-		{
-			DirectX::BoundingBox headBB;
-			switch (listHead->direction)
-			{
-			case Direction::up:
-			case Direction::down:
-				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x / 2, listHead->boundingBox.Extents.y, listHead->boundingBox.Extents.z));
-				break;
-			case Direction::left:
-			case Direction::right:
-				headBB = DirectX::BoundingBox(listHead->boundingBox.Center,
-					DirectX::XMFLOAT3(listHead->boundingBox.Extents.x, listHead->boundingBox.Extents.y / 2, listHead->boundingBox.Extents.z));
-				break;
-			default:
-				break;
-			}
-			return headBB.Intersects(bb);
-		}
 	};
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
@@ -171,6 +137,8 @@ namespace Snake
 		void GameInitialize();
 
 		void ScrollViewMatrix();
+
+		bool m_isGameOver;
 
 	private:
 		Windows::Foundation::Point RandomPosition(int min, int max);

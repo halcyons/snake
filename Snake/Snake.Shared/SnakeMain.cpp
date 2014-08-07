@@ -89,14 +89,10 @@ bool SnakeMain::Render()
 	// Render the scene objects.
 	// TODO: Replace this with your app's content rendering functions.
 	m_fpsTextRenderer->Render();
-	if (!m_sceneRenderer->Render())
+	if (m_sceneRenderer->Render())
 	{
-		m_isGameOver = false;
+		m_isGameOver = m_sceneRenderer->m_isGameOver;
 	}	
-	else
-	{
-		m_isGameOver = true;
-	}
 	return true;
 }
 

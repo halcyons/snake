@@ -18,7 +18,8 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_foodIndexCount(0),
 	m_tracking(false),
 	m_deviceResources(deviceResources),
-	m_isNeedChangePos(true)
+	m_isNeedChangePos(true),
+	m_isGameOver(false)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	GameInitialize();
@@ -178,7 +179,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 			pt = RandomPosition(-10, 10);
 			m_foodBB = BoundingBox(XMFLOAT3(pt.X, pt.Y, 0.0f),
 				XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
-		} while ((m_snake->IsIntersectWithBB(m_foodBB)));
+		} while ((m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listEnd)));
 		m_isNeedChangePos = false;
 	}
 	
@@ -345,19 +346,20 @@ bool Sample3DSceneRenderer::Render()
 		snakeNode = snakeNode->next;		
 	}
 	snakeNode = nullptr;
-	if (m_snake->IsIntersectWithBB(m_foodBB))
+	if (m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listHead))
 	{
 		m_snake->AddHeader();
 		m_isNeedChangePos = true;
 	}
-	if (m_snake->IsIntersectWithBody())
+	if (m_snake->IsCollideWithBody())
 	{
-		return true;
+		m_isGameOver = true;
 	}
 	else
 	{
-		return false;
+		m_isGameOver = false;
 	}
+	return true;
 }
 
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
