@@ -21,11 +21,19 @@ namespace Snake
 	{
 		int x = 0;
 		int y = 0;
-		int size = 1;
+		int size = (int)NODE_SIZE;
 		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
 			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
 		Direction direction = Direction::up;
 		Node* next = nullptr;
+
+		void SetCoordinate(int x, int y)
+		{
+			this->x = x;
+			this->y = y;
+			this->boundingBox = DirectX::BoundingBox(
+				DirectX::XMFLOAT3((float)x, (float)y, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
+		}
 	};
 
 	struct List
@@ -42,20 +50,16 @@ namespace Snake
 			switch (listHead->direction)
 			{
 			case Direction::up:
-				node->x = listHead->x;
-				node->y = listHead->y + listHead->size;
+				node->SetCoordinate(listHead->x, listHead->y + listHead->size);				
 				break;
 			case Direction::down:
-				node->x = listHead->x;
-				node->y = listHead->y - listHead->size;
+				node->SetCoordinate(listHead->x, listHead->y - listHead->size);				
 				break;
 			case Direction::left:
-				node->x = listHead->x - listHead->size;
-				node->y = listHead->y;
+				node->SetCoordinate(listHead->x - listHead->size, listHead->y);				
 				break;
 			case Direction::right:
-				node->x = listHead->x + listHead->size;
-				node->y = listHead->y;
+				node->SetCoordinate(listHead->x + listHead->size, listHead->y);				
 				break;
 			}
 			node->size = listHead->size;

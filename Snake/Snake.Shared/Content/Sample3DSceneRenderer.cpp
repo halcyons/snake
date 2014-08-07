@@ -316,10 +316,6 @@ bool Sample3DSceneRenderer::Render()
 
 		XMMATRIX translation = XMMatrixTranslation((float)snakeNode->x, (float)snakeNode->y, 0.0f);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
-		// Transform the node's BoundingBox.
-		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
-			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
-		boundingBox.Transform(snakeNode->boundingBox, XMLoadFloat4x4(&m_constantBufferData.model));
 
 		// Prepare the constant buffer to send it to the graphics device.
 		context->UpdateSubresource(
