@@ -171,6 +171,8 @@ namespace Snake
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_foodSRV;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>		m_samplerState;
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rsState;
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_dsState;
 
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;

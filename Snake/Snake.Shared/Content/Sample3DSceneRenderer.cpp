@@ -72,15 +72,15 @@ void Sample3DSceneRenderer::ScrollViewMatrix()
 void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 {
 	Size outputSize = m_deviceResources->GetOutputSize();
-	//float aspectRatio = outputSize.Width / outputSize.Height;
-	//float fovAngleY = 70.0f * XM_PI / 180.0f;
+	float aspectRatio = outputSize.Width / outputSize.Height;
+	float fovAngleY = 70.0f * XM_PI / 180.0f;
 
-	//// This is a simple example of change that can be made when the app is in
-	//// portrait or snapped view.
-	//if (aspectRatio < 1.0f)
-	//{
-	//	fovAngleY *= 2.0f;
-	//}
+	// This is a simple example of change that can be made when the app is in
+	// portrait or snapped view.
+	if (aspectRatio < 1.0f)
+	{
+		fovAngleY *= 2.0f;
+	}
 
 	// Note that the OrientationTransform3D matrix is post-multiplied here
 	// in order to correctly orient the scene to match the display orientation.
@@ -108,7 +108,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 		perspectiveMatrix * orientationMatrix
 		);
 
-	static const XMVECTORF32 eye = { 0.0f, 0.0f, -1.0f, 0.0f };
+	static const XMVECTORF32 eye = { 5.0f, 3.0f, -15.0f, 0.0f };
 	static const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
@@ -211,6 +211,8 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		nullptr,
 		0
 		);
+
+	context->RSSetState(m_rsState.Get());
 
 	// Attach our pixel shader.
 	context->PSSetShader(
@@ -336,6 +338,10 @@ bool Sample3DSceneRenderer::Render()
 			m_constantBuffer.GetAddressOf()
 			);
 
+		context->RSSetState(m_rsState.Get());
+
+		//context->OMSetDepthStencilState(m_dsState.Get(), 0);
+
 		// Draw the objects.
 		context->DrawIndexed(
 			m_indexCount,
@@ -423,7 +429,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		// Load mesh vertices. Each vertex has a position and a color.
 		static const VertexPositionColor cubeVertices[] = 
 		{
-			{XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f)},
+			{XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 			{XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
 			{XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
 			{XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f)},
@@ -661,6 +667,38 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 
 	Microsoft::WRL::ComPtr<ID3D11Resource> texture;
 	DirectX::CreateWICTextureFromFile(device, m_deviceResources->GetD3DDeviceContext(), L"head.jpg", &texture, &m_foodSRV);
+
+	// RS state.
+	D3D11_RASTERIZER_DESC rsDesc;
+	ZeroMemory(&rsDesc, sizeof(rsDesc));
+	rsDesc.CullMode = D3D11_CULL_NONE;
+	rsDesc.FillMode = D3D11_FILL_SOLID;
+	DX::ThrowIfFailed(
+		device->CreateRasterizerState(&rsDesc, &m_rsState)
+		);
+
+	// Depth stencil state.
+	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+	
+	ZeroMemory(&dsDesc, sizeof(dsDesc));
+	dsDesc.DepthEnable = true;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	dsDesc.StencilEnable = false;
+	dsDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	dsDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+
+	dsDesc.BackFace = dsDesc.FrontFace;
+	
+	DX::ThrowIfFailed(
+		device->CreateDepthStencilState(&dsDesc, &m_dsState)
+		);
 }
 
 void Sample3DSceneRenderer::ReleaseDeviceDependentResources()
