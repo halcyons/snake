@@ -14,8 +14,14 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.cpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\dds.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
@@ -44,11 +50,25 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodVertexShader.hlsl">
       <ShaderType>Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\TexturePixelShader.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ShaderModel>4.0_level_9_3</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\TextureVertexShader.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ShaderModel>4.0_level_9_3</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
+    <Image Include="$(MSBuildThisFileDirectory)snake_body.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <MeshContentTask Include="$(MSBuildThisFileDirectory)SnakeBody.FBX">
+      <FileType>Document</FileType>
+    </MeshContentTask>
   </ItemGroup>
 </Project>

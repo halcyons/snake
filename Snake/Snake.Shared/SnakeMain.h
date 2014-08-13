@@ -18,7 +18,7 @@ namespace Snake
 		void TrackingUpdate(float positionX) { m_pointerLocationX = positionX; }
 		void StopTracking() { m_sceneRenderer->StopTracking(); }
 		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
-		void GameInitialize() { m_sceneRenderer->GameInitialize(); }
+		void GameInitialize(int length) { m_sceneRenderer->GameInitialize(length); }
 
 		void Update();
 		bool Render();

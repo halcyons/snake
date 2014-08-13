@@ -5,6 +5,8 @@
 #include "math.h"
 #include "Common\WICTextureLoader.h"
 #include <random>
+#include "DirectXPackedVector.h"
+
 using namespace Snake;
 
 using namespace DirectX;
@@ -22,7 +24,6 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_isGameOver(false)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
-	GameInitialize();
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
@@ -50,17 +51,13 @@ void Sample3DSceneRenderer::Move(int step, Direction direction)
 }
 
 
-void Sample3DSceneRenderer::GameInitialize()
+void Sample3DSceneRenderer::GameInitialize(int snakeLength)
 {
 	if (m_snake != nullptr)
 	{
 		m_snake.release();
 	}
-	m_snake = std::make_unique<List>();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
-	m_snake->AddHeader();
+	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox.Extents.x * 2);
 }
 
 void Sample3DSceneRenderer::ScrollViewMatrix()
@@ -269,7 +266,7 @@ bool Sample3DSceneRenderer::Render()
 	}
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
-	
+	auto device = m_deviceResources->GetD3DDevice();
 
 	RenderFood(context);
 
@@ -281,73 +278,89 @@ bool Sample3DSceneRenderer::Render()
 			continue;
 		}
 		
+		m_snakeModel->Draw(context, device, XMLoadFloat4x4(&m_constantBufferData.model),
+			XMLoadFloat4x4(&m_constantBufferData.view),
+			XMLoadFloat4x4(&m_constantBufferData.projection),
+			[&](){
+			context->IASetInputLayout(m_modelInputLayout.Get());
+			context->VSSetShader(m_textureVertexShader.Get(), nullptr, 0);
+			context->PSSetSamplers(
+				0,                          // starting at the first sampler slot 
+				1,                          // set one sampler binding 
+				m_samplerState.GetAddressOf()
+				);
+			context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
+			context->RSSetState(m_rsState.Get());
+		});
 
-		// Each vertex is one instance of the VertexPositionColor struct.
-		UINT stride = sizeof(VertexPositionColor);
-		UINT offset = 0;
-		context->IASetVertexBuffers(
-			0,
-			1,
-			m_vertexBuffer.GetAddressOf(),
-			&stride,
-			&offset
-			);
-
-		context->IASetIndexBuffer(
-			m_indexBuffer.Get(),
-			DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
-			0
-			);
-
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		context->IASetInputLayout(m_inputLayout.Get());
-
-		// Attach our vertex shader.
-		context->VSSetShader(
-			m_vertexShader.Get(),
-			nullptr,
-			0
-			);
-
-		// Attach our pixel shader.
-		context->PSSetShader(
-			m_pixelShader.Get(),
-			nullptr,
-			0
-			);
-
-		XMMATRIX translation = XMMatrixTranslation((float)snakeNode->x, (float)snakeNode->y, 0.0f);
+		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->size), (float)snakeNode->y * snakeNode->size, 0.0f);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+		//// Each vertex is one instance of the VertexPositionColor struct.
+		//UINT stride = sizeof(VertexPositionColor);
+		//UINT offset = 0;
+		//context->IASetVertexBuffers(
+		//	0,
+		//	1,
+		//	m_vertexBuffer.GetAddressOf(),
+		//	&stride,
+		//	&offset
+		//	);
 
-		// Prepare the constant buffer to send it to the graphics device.
-		context->UpdateSubresource(
-			m_constantBuffer.Get(),
-			0,
-			NULL,
-			&m_constantBufferData,
-			0,
-			0
-			);
-		
-		
-		// Send the constant buffer to the graphics device.
-		context->VSSetConstantBuffers(
-			0,
-			1,
-			m_constantBuffer.GetAddressOf()
-			);
+		//context->IASetIndexBuffer(
+		//	m_indexBuffer.Get(),
+		//	DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
+		//	0
+		//	);
 
-		context->RSSetState(m_rsState.Get());
+		//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		//context->OMSetDepthStencilState(m_dsState.Get(), 0);
+		//context->IASetInputLayout(m_inputLayout.Get());
 
-		// Draw the objects.
-		context->DrawIndexed(
-			m_indexCount,
-			0,
-			0
-			);
+		//// Attach our vertex shader.
+		//context->VSSetShader(
+		//	m_vertexShader.Get(),
+		//	nullptr,
+		//	0
+		//	);
+
+		//// Attach our pixel shader.
+		//context->PSSetShader(
+		//	m_pixelShader.Get(),
+		//	nullptr,
+		//	0
+		//	);
+
+		//XMMATRIX translation = XMMatrixTranslation((float)snakeNode->x, (float)snakeNode->y, 0.0f);
+		//XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+
+		//// Prepare the constant buffer to send it to the graphics device.
+		//context->UpdateSubresource(
+		//	m_constantBuffer.Get(),
+		//	0,
+		//	NULL,
+		//	&m_constantBufferData,
+		//	0,
+		//	0
+		//	);
+		//
+		//
+		//// Send the constant buffer to the graphics device.
+		//context->VSSetConstantBuffers(
+		//	0,
+		//	1,
+		//	m_constantBuffer.GetAddressOf()
+		//	);
+
+		//context->RSSetState(m_rsState.Get());
+
+		////context->OMSetDepthStencilState(m_dsState.Get(), 0);
+
+		//// Draw the objects.
+		//context->DrawIndexed(
+		//	m_indexCount,
+		//	0,
+		//	0
+		//	);
 		
 		snakeNode = snakeNode->next;		
 	}
@@ -370,6 +383,49 @@ bool Sample3DSceneRenderer::Render()
 
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
 {
+	auto device = m_deviceResources->GetD3DDevice();
+	m_snakeModel = CMOModel::CreateFromCMO(device, L"SnakeBody.cmo");
+	GameInitialize(3);
+
+
+	auto loadTextureVSTask = DX::ReadDataAsync(L"TextureVertexShader.cso");
+	auto loadTexturePSTask = DX::ReadDataAsync(L"TexturePixelShader.cso");
+
+	// After the vertex shader file is loaded, create the shader and input layout.
+	auto createTextureVSTask = loadTextureVSTask.then([this](const std::vector<byte>& fileData) {
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateVertexShader(
+			&fileData[0],
+			fileData.size(),
+			nullptr,
+			&m_textureVertexShader
+			)
+			);
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateInputLayout(
+				VertexPositionNormalTangentColorTexture::InputElements,
+				VertexPositionNormalTangentColorTexture::InputElementCount,
+				&fileData[0],
+				fileData.size(),
+				&m_modelInputLayout
+			)
+			);
+
+	});
+
+	// After the pixel shader file is loaded, create the shader and constant buffer.
+	auto createTexturePSTask = loadTexturePSTask.then([this](const std::vector<byte>& fileData) {
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreatePixelShader(
+			&fileData[0],
+			fileData.size(),
+			nullptr,
+			&m_texturePixelShader
+			)
+			);
+	});
+
+
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
 	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
@@ -439,7 +495,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			{XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
 			{XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 		};
-	
+		
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
 		vertexBufferData.pSysMem = cubeVertices;
 		vertexBufferData.SysMemPitch = 0;
@@ -635,11 +691,11 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
-	(createFoodCube && createCubeTask).then([this]() {
+	(createFoodCube && createCubeTask && createTextureVSTask && createTexturePSTask).then([this]() {
 		m_loadingComplete = true;
 	});
 
-	auto device = m_deviceResources->GetD3DDevice();
+	
 
 	// Create the sampler state
 	D3D11_SAMPLER_DESC samplerDesc;

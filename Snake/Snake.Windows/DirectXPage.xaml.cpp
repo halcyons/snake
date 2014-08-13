@@ -264,7 +264,7 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-	m_main->GameInitialize();
+	m_main->GameInitialize(3);
 	m_isNeedRender = true;
 }
 

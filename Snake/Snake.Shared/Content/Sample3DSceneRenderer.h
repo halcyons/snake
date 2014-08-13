@@ -5,7 +5,7 @@
 #include "..\Common\StepTimer.h"
 #include <vector>
 #include "DirectXCollision.h"
-
+#include "Common\LoadCMOModel.h"
 namespace Snake
 {
 	const float NODE_SIZE = 1.0f;
@@ -21,7 +21,7 @@ namespace Snake
 	{
 		int x = 0;
 		int y = 0;
-		int size = (int)NODE_SIZE;
+		float size = NODE_SIZE;
 		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
 			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
 		Direction direction = Direction::up;
@@ -32,7 +32,7 @@ namespace Snake
 			this->x = x;
 			this->y = y;
 			this->boundingBox = DirectX::BoundingBox(
-				DirectX::XMFLOAT3((float)x, (float)y, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
+				DirectX::XMFLOAT3((float)x, (float)y, 0.0f), DirectX::XMFLOAT3(size / 2, size / 2, size / 2));
 		}
 	};
 
@@ -41,7 +41,16 @@ namespace Snake
 		Node* listHead = new Node;
 		Node* listEnd = listHead;
 		int count = 1;
-		
+		List(int length, float size)
+		{
+			count = length;
+			listHead->size = size;
+			listEnd->size = size;
+			for (int i = 0; i < length; ++i)
+			{
+				AddHeader();
+			}
+		}
 		// Add node to the header.
 		void AddHeader()
 		{
@@ -50,16 +59,16 @@ namespace Snake
 			switch (listHead->direction)
 			{
 			case Direction::up:
-				node->SetCoordinate(listHead->x, listHead->y + listHead->size);				
+				node->SetCoordinate(listHead->x, listHead->y + 1);				
 				break;
 			case Direction::down:
-				node->SetCoordinate(listHead->x, listHead->y - listHead->size);				
+				node->SetCoordinate(listHead->x, listHead->y - 1);				
 				break;
 			case Direction::left:
-				node->SetCoordinate(listHead->x - listHead->size, listHead->y);				
+				node->SetCoordinate(listHead->x - 1, listHead->y);				
 				break;
 			case Direction::right:
-				node->SetCoordinate(listHead->x + listHead->size, listHead->y);				
+				node->SetCoordinate(listHead->x + 1, listHead->y);				
 				break;
 			}
 			node->size = listHead->size;
@@ -134,13 +143,14 @@ namespace Snake
 		void Move(int step);
 		void Move(int step, Direction direction);
 
-		void GameInitialize();
+		void GameInitialize(int snakeLength);
 
 		void ScrollViewMatrix();
 
 		bool m_isGameOver;
 
 	private:
+		std::unique_ptr<CMOModel>	m_snakeModel;
 		Windows::Foundation::Point RandomPosition(int min, int max);
 		bool RenderFood(ID3D11DeviceContext* context);
 		void Rotate(float radians);
@@ -161,11 +171,13 @@ namespace Snake
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
-
+		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_modelInputLayout;
 		// Food resources.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_foodInputLayout;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodVertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodIndexBuffer;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_textureVertexShader;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_texturePixelShader;
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_foodVertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_foodPixelShader;
 

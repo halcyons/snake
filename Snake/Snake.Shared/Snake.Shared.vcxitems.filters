@@ -21,6 +21,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\dds.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
@@ -37,6 +41,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">
@@ -51,6 +57,8 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\TexturePixelShader.hlsl" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\TextureVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">
@@ -62,5 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
+    <Image Include="$(MSBuildThisFileDirectory)snake_body.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
   </ItemGroup>
 </Project>
