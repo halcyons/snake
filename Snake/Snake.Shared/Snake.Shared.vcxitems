@@ -71,4 +71,7 @@
       <FileType>Document</FileType>
     </MeshContentTask>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
+  </ItemGroup>
 </Project>

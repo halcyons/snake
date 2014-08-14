@@ -57,7 +57,7 @@ void Sample3DSceneRenderer::GameInitialize(int snakeLength)
 	{
 		m_snake.release();
 	}
-	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox.Extents.x * 2);
+	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox);
 }
 
 void Sample3DSceneRenderer::ScrollViewMatrix()
@@ -175,7 +175,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		{
 			pt = RandomPosition(-10, 10);
 			m_foodBB = BoundingBox(XMFLOAT3(pt.X, pt.Y, 0.0f),
-				XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
+				XMFLOAT3(m_snake->listHead->boundingBox.Extents.x, m_snake->listHead->boundingBox.Extents.y, m_snake->listHead->boundingBox.Extents.z));
 		} while ((m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listEnd)));
 		m_isNeedChangePos = false;
 	}
@@ -271,13 +271,20 @@ bool Sample3DSceneRenderer::Render()
 	RenderFood(context);
 
 	Node* snakeNode = m_snake->listHead;
+	
+
+	
 	for (int i = 0; i < m_snake->count; ++i)
 	{
 		if (snakeNode == nullptr)
 		{
 			continue;
 		}
-		
+
+		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->boundingBox.Extents.x * 2), 
+			(float)snakeNode->y * snakeNode->boundingBox.Extents.y * 2, 0.0f);
+		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+
 		m_snakeModel->Draw(context, device, XMLoadFloat4x4(&m_constantBufferData.model),
 			XMLoadFloat4x4(&m_constantBufferData.view),
 			XMLoadFloat4x4(&m_constantBufferData.projection),
@@ -293,8 +300,7 @@ bool Sample3DSceneRenderer::Render()
 			context->RSSetState(m_rsState.Get());
 		});
 
-		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->size), (float)snakeNode->y * snakeNode->size, 0.0f);
-		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+		
 		//// Each vertex is one instance of the VertexPositionColor struct.
 		//UINT stride = sizeof(VertexPositionColor);
 		//UINT offset = 0;
@@ -599,39 +605,39 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		{
 			// -z
 			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f),  XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
 
 			// +z
 			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f,  0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f,  0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
 
 			// +y
 			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f,  0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f, 0.5f,  0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
 
 			// -y
 			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f,  0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT2(1.0f, 1.0f) },
 
 			// -x
-			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
 			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
 
 			// +x
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f,  0.5f), XMFLOAT2(1.0f, 1.0f) },
 		};
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };

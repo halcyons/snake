@@ -8,7 +8,7 @@
 #include "Common\LoadCMOModel.h"
 namespace Snake
 {
-	const float NODE_SIZE = 1.0f;
+	const float sizeNODE_SIZE = 1.0f;
 	enum Direction
 	{
 		up = 1,
@@ -21,31 +21,31 @@ namespace Snake
 	{
 		int x = 0;
 		int y = 0;
-		float size = NODE_SIZE;
-		DirectX::BoundingBox boundingBox = DirectX::BoundingBox(
-			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(NODE_SIZE / 2, NODE_SIZE / 2, NODE_SIZE / 2));
+		DirectX::BoundingBox boundingBox;
 		Direction direction = Direction::up;
 		Node* next = nullptr;
-
+		Node(DirectX::BoundingBox boundingBox)
+		{
+			this->boundingBox = boundingBox;
+		}
 		void SetCoordinate(int x, int y)
 		{
 			this->x = x;
 			this->y = y;
-			this->boundingBox = DirectX::BoundingBox(
-				DirectX::XMFLOAT3((float)x, (float)y, 0.0f), DirectX::XMFLOAT3(size / 2, size / 2, size / 2));
+			this->boundingBox.Center = DirectX::XMFLOAT3((float)x, (float)y, 0.0f);
 		}
 	};
 
 	struct List
 	{
-		Node* listHead = new Node;
-		Node* listEnd = listHead;
-		int count = 1;
-		List(int length, float size)
-		{
-			count = length;
-			listHead->size = size;
-			listEnd->size = size;
+		Node* listHead;
+		Node* listEnd;
+		int count = 0;
+		List(int length, DirectX::BoundingBox boundingBox)
+		{			
+			listHead = new Node(boundingBox);
+			listEnd = listHead;
+			
 			for (int i = 0; i < length; ++i)
 			{
 				AddHeader();
@@ -54,7 +54,8 @@ namespace Snake
 		// Add node to the header.
 		void AddHeader()
 		{
-			Node* node = new Node;
+			Node* node = new Node(listHead->boundingBox);
+			
 			node->direction = listHead->direction;
 			switch (listHead->direction)
 			{
@@ -71,7 +72,6 @@ namespace Snake
 				node->SetCoordinate(listHead->x + 1, listHead->y);				
 				break;
 			}
-			node->size = listHead->size;
 			node->next = listHead;
 			listHead = node;
 			count++;
