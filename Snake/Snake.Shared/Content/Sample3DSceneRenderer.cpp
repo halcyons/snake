@@ -174,84 +174,102 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		do
 		{
 			pt = RandomPosition(-10, 10);
-			m_foodBB = BoundingBox(XMFLOAT3(pt.X, pt.Y, 0.0f),
-				XMFLOAT3(m_snake->listHead->boundingBox.Extents.x, m_snake->listHead->boundingBox.Extents.y, m_snake->listHead->boundingBox.Extents.z));
+			m_foodBB = m_foodModel->meshes[0]->BoundingBox;
+			m_foodBB.Center = XMFLOAT3(pt.X, pt.Y, 0.0f);
 		} while ((m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listEnd)));
 		m_isNeedChangePos = false;
 	}
 	
-
-	// Each vertex is one instance of the FoodVertex struct.
-	UINT stride = sizeof(FoodVertex);
-	UINT offset = 0;
-	context->IASetVertexBuffers(
-		0,
-		1,
-		m_foodVertexBuffer.GetAddressOf(),
-		&stride,
-		&offset
-		);
-
-	context->IASetIndexBuffer(
-		m_foodIndexBuffer.Get(),
-		DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
-		0
-		);
-
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	context->IASetInputLayout(m_foodInputLayout.Get());
-
-	// Attach our vertex shader.
-	context->VSSetShader(
-		m_foodVertexShader.Get(),
-		nullptr,
-		0
-		);
-
-	context->RSSetState(m_rsState.Get());
-
-	// Attach our pixel shader.
-	context->PSSetShader(
-		m_foodPixelShader.Get(),
-		nullptr,
-		0
-		);
-
-	context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
-
-	context->PSSetSamplers(
-		0,                          // starting at the first sampler slot 
-		1,                          // set one sampler binding 
-		m_samplerState.GetAddressOf()
-		);
-
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranslation(pt.X, pt.Y, 0.0f));
 
-	// Prepare the constant buffer to send it to the graphics device.
-	context->UpdateSubresource(
-		m_constantBuffer.Get(),
-		0,
-		NULL,
-		&m_constantBufferData,
-		0,
-		0
-		);
+	m_foodModel->Draw(context, m_deviceResources->GetD3DDevice(), XMLoadFloat4x4(&m_constantBufferData.model),
+		XMLoadFloat4x4(&m_constantBufferData.view),
+		XMLoadFloat4x4(&m_constantBufferData.projection),
+		[&](){
+
+		context->IASetInputLayout(m_modelInputLayout.Get());
+		context->VSSetShader(m_textureVertexShader.Get(), nullptr, 0);
+		context->PSSetSamplers(
+			0,                          // starting at the first sampler slot 
+			1,                          // set one sampler binding 
+			m_samplerState.GetAddressOf()
+			);
+		//context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
+		context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
+
+		context->RSSetState(m_rsState.Get());
+	});
+
+	//// Each vertex is one instance of the FoodVertex struct.
+	//UINT stride = sizeof(FoodVertex);
+	//UINT offset = 0;
+	//context->IASetVertexBuffers(
+	//	0,
+	//	1,
+	//	m_foodVertexBuffer.GetAddressOf(),
+	//	&stride,
+	//	&offset
+	//	);
+
+	//context->IASetIndexBuffer(
+	//	m_foodIndexBuffer.Get(),
+	//	DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
+	//	0
+	//	);
+
+	//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//context->IASetInputLayout(m_foodInputLayout.Get());
+
+	//// Attach our vertex shader.
+	//context->VSSetShader(
+	//	m_foodVertexShader.Get(),
+	//	nullptr,
+	//	0
+	//	);
+
+	//context->RSSetState(m_rsState.Get());
+
+	//// Attach our pixel shader.
+	//context->PSSetShader(
+	//	m_foodPixelShader.Get(),
+	//	nullptr,
+	//	0
+	//	);
+
+	//context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
+
+	//context->PSSetSamplers(
+	//	0,                          // starting at the first sampler slot 
+	//	1,                          // set one sampler binding 
+	//	m_samplerState.GetAddressOf()
+	//	);
+
+	//
+	//// Prepare the constant buffer to send it to the graphics device.
+	//context->UpdateSubresource(
+	//	m_constantBuffer.Get(),
+	//	0,
+	//	NULL,
+	//	&m_constantBufferData,
+	//	0,
+	//	0
+	//	);
 
 
-	// Send the constant buffer to the graphics device.
-	context->VSSetConstantBuffers(
-		0,
-		1,
-		m_constantBuffer.GetAddressOf()
-		);
+	//// Send the constant buffer to the graphics device.
+	//context->VSSetConstantBuffers(
+	//	0,
+	//	1,
+	//	m_constantBuffer.GetAddressOf()
+	//	);
 
-	// Draw the objects.
-	context->DrawIndexed(
-		m_foodIndexCount,
-		0,
-		0
-		);
+	//// Draw the objects.
+	//context->DrawIndexed(
+	//	m_foodIndexCount,
+	//	0,
+	//	0
+	//	);
 
 	return true;
 }
@@ -272,8 +290,6 @@ bool Sample3DSceneRenderer::Render()
 
 	Node* snakeNode = m_snake->listHead;
 	
-
-	
 	for (int i = 0; i < m_snake->count; ++i)
 	{
 		if (snakeNode == nullptr)
@@ -284,11 +300,12 @@ bool Sample3DSceneRenderer::Render()
 		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->boundingBox.Extents.x * 2), 
 			(float)snakeNode->y * snakeNode->boundingBox.Extents.y * 2, 0.0f);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
-
+		
 		m_snakeModel->Draw(context, device, XMLoadFloat4x4(&m_constantBufferData.model),
 			XMLoadFloat4x4(&m_constantBufferData.view),
 			XMLoadFloat4x4(&m_constantBufferData.projection),
 			[&](){
+			
 			context->IASetInputLayout(m_modelInputLayout.Get());
 			context->VSSetShader(m_textureVertexShader.Get(), nullptr, 0);
 			context->PSSetSamplers(
@@ -296,7 +313,9 @@ bool Sample3DSceneRenderer::Render()
 				1,                          // set one sampler binding 
 				m_samplerState.GetAddressOf()
 				);
+			//context->PSSetShaderResources(0, 1, m_bodySRV.GetAddressOf());
 			context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
+			
 			context->RSSetState(m_rsState.Get());
 		});
 
@@ -390,7 +409,8 @@ bool Sample3DSceneRenderer::Render()
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
 {
 	auto device = m_deviceResources->GetD3DDevice();
-	m_snakeModel = CMOModel::CreateFromCMO(device, L"SnakeBody.cmo");
+	m_snakeModel = CMOModel::CreateFromCMO(device, L"CrateModel.cmo");
+	m_foodModel = CMOModel::CreateFromCMO(device, L"CrateModel.cmo");
 	GameInitialize(3);
 
 
@@ -728,8 +748,13 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		);
 
 	Microsoft::WRL::ComPtr<ID3D11Resource> texture;
-	DirectX::CreateWICTextureFromFile(device, m_deviceResources->GetD3DDeviceContext(), L"head.jpg", &texture, &m_foodSRV);
-
+	DX::ThrowIfFailed(
+		DirectX::CreateWICTextureFromFile(device, m_deviceResources->GetD3DDeviceContext(), L"head.jpg", &texture, &m_foodSRV)
+		);
+	Microsoft::WRL::ComPtr<ID3D11Resource> texture1;
+	DX::ThrowIfFailed(
+		DirectX::CreateWICTextureFromFile(device, m_deviceResources->GetD3DDeviceContext(), L"texture.jpg", &texture1, &m_bodySRV)
+		);
 	// RS state.
 	D3D11_RASTERIZER_DESC rsDesc;
 	ZeroMemory(&rsDesc, sizeof(rsDesc));

@@ -71,8 +71,11 @@
   <ItemGroup>
     <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
     <Image Include="$(MSBuildThisFileDirectory)snake_body.jpg" />
+    <Image Include="$(MSBuildThisFileDirectory)texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
+    <None Include="$(MSBuildThisFileDirectory)FoodModel.FBX" />
+    <None Include="$(MSBuildThisFileDirectory)CrateModel.FBX" />
   </ItemGroup>
 </Project>

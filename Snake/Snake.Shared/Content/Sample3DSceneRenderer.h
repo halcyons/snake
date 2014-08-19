@@ -40,13 +40,14 @@ namespace Snake
 	{
 		Node* listHead;
 		Node* listEnd;
-		int count = 0;
+		int count = 1;
 		List(int length, DirectX::BoundingBox boundingBox)
 		{			
 			listHead = new Node(boundingBox);
 			listEnd = listHead;
 			
-			for (int i = 0; i < length; ++i)
+			// Add (length - 1) other nodes.
+			for (int i = 0; i < length - 1; ++i)
 			{
 				AddHeader();
 			}
@@ -151,6 +152,7 @@ namespace Snake
 
 	private:
 		std::unique_ptr<CMOModel>	m_snakeModel;
+		std::unique_ptr<CMOModel>	m_foodModel;
 		Windows::Foundation::Point RandomPosition(int min, int max);
 		bool RenderFood(ID3D11DeviceContext* context);
 		void Rotate(float radians);
@@ -181,6 +183,7 @@ namespace Snake
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_foodVertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_foodPixelShader;
 
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_bodySRV;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_foodSRV;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>		m_samplerState;
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rsState;

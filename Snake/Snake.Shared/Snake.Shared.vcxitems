@@ -65,6 +65,7 @@
   <ItemGroup>
     <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
     <Image Include="$(MSBuildThisFileDirectory)snake_body.jpg" />
+    <Image Include="$(MSBuildThisFileDirectory)texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <MeshContentTask Include="$(MSBuildThisFileDirectory)SnakeBody.FBX">
@@ -72,6 +73,12 @@
     </MeshContentTask>
   </ItemGroup>
   <ItemGroup>
+    <MeshContentTask Include="$(MSBuildThisFileDirectory)FoodModel.FBX">
+      <FileType>Document</FileType>
+    </MeshContentTask>
+    <MeshContentTask Include="$(MSBuildThisFileDirectory)CrateModel.FBX">
+      <FileType>Document</FileType>
+    </MeshContentTask>
     <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
   </ItemGroup>
 </Project>
