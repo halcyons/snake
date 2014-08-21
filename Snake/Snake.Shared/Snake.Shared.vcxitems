@@ -79,9 +79,12 @@
     <MeshContentTask Include="$(MSBuildThisFileDirectory)CrateModel.FBX">
       <FileType>Document</FileType>
     </MeshContentTask>
+    <None Include="$(MSBuildThisFileDirectory)CrateModel.FBX" />
+    <None Include="$(MSBuildThisFileDirectory)FoodModel.FBX" />
     <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
     <MeshContentTask Include="$(MSBuildThisFileDirectory)wall.FBX">
       <FileType>Document</FileType>
     </MeshContentTask>
+    <None Include="$(MSBuildThisFileDirectory)wall.FBX" />
   </ItemGroup>
 </Project>

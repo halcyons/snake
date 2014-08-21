@@ -76,5 +76,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
     <None Include="$(MSBuildThisFileDirectory)wall.FBX" />
+    <None Include="$(MSBuildThisFileDirectory)FoodModel.FBX" />
+    <None Include="$(MSBuildThisFileDirectory)CrateModel.FBX" />
   </ItemGroup>
 </Project>

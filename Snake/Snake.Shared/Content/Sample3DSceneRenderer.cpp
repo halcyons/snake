@@ -58,14 +58,14 @@ void Sample3DSceneRenderer::Move(int step, Direction direction)
 					direction = Direction::down;
 				}
 			}
-			else if (m_snake->listHead->y <= 10)
+			/*else if (m_snake->listHead->y <= 10)
 			{
 				if (m_snake->listHead->z > 10)
 				{
 					direction = Direction::down;
 				}
 
-			}
+			}*/
 			
 			break;
 		case Snake::right:
@@ -160,13 +160,29 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
-	////////////Update the view matrix
-	//XMVECTORF32 eye = { m_snake->listHead->x, m_snake->listHead->y, -15.0f, 0.0f };
-	//XMVECTORF32 at = { m_snake->listHead->x, m_snake->listHead->y, 0.0f, 0.0f };
-	//XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	//////////Update the view matrix
+	XMVECTOR eye;
+	XMVECTOR at;
+	XMVECTOR up;
+	switch (m_snake->listHead->direction)
+	{
+	case Direction::in:
+		eye = XMVectorSet( m_snake->listHead->x, m_snake->listHead->y + 15.0f, m_snake->listHead->z, 0.0f );
+		at = XMVectorSet( m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
+		up = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
+		break;
+	case Direction::up:
+		eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z - 15.0f, 0.0f);
+		at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
+		up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		break;
+	default:
+		break;
+	}
+	
 
-	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
-	////////////
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
+	//////////
 
 	double seconds = (timer.GetTotalSeconds());
 	
@@ -359,7 +375,7 @@ bool Sample3DSceneRenderer::Render()
 	auto device = m_deviceResources->GetD3DDevice();
 	
 	RenderFood(context);
-	//RenderBackground();
+	RenderBackground();
 	Node* snakeNode = m_snake->listHead;
 	
 	for (int i = 0; i < m_snake->count; ++i)
