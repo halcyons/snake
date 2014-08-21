@@ -13,14 +13,17 @@ namespace Snake
 	{
 		up = 1,
 		right = 2,
+		in = 3,
 		down = -1,
-		left = -2
+		left = -2,
+		out = -3
 	};
 
 	struct Node
 	{
 		int x = 0;
 		int y = 0;
+		int z = 0;
 		DirectX::BoundingBox boundingBox;
 		Direction direction = Direction::up;
 		Node* next = nullptr;
@@ -28,11 +31,12 @@ namespace Snake
 		{
 			this->boundingBox = boundingBox;
 		}
-		void SetCoordinate(int x, int y)
+		void SetCoordinate(int x, int y, int z)
 		{
 			this->x = x;
 			this->y = y;
-			this->boundingBox.Center = DirectX::XMFLOAT3((float)x, (float)y, 0.0f);
+			this->z = z;
+			this->boundingBox.Center = DirectX::XMFLOAT3((float)x, (float)y, (float)z);
 		}
 	};
 
@@ -61,16 +65,22 @@ namespace Snake
 			switch (listHead->direction)
 			{
 			case Direction::up:
-				node->SetCoordinate(listHead->x, listHead->y + 1);				
+				node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);				
 				break;
 			case Direction::down:
-				node->SetCoordinate(listHead->x, listHead->y - 1);				
+				node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
 				break;
 			case Direction::left:
-				node->SetCoordinate(listHead->x - 1, listHead->y);				
+				node->SetCoordinate(listHead->x - 1, listHead->y, listHead->z);
 				break;
 			case Direction::right:
-				node->SetCoordinate(listHead->x + 1, listHead->y);				
+				node->SetCoordinate(listHead->x + 1, listHead->y, listHead->z);
+				break;
+			case Direction::in:
+				node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
+				break;
+			case Direction::out:
+				node->SetCoordinate(listHead->x, listHead->y, listHead->z - 1);
 				break;
 			}
 			node->next = listHead;
@@ -148,13 +158,16 @@ namespace Snake
 
 		void ScrollViewMatrix();
 
+
 		bool m_isGameOver;
 
 	private:
 		std::unique_ptr<CMOModel>	m_snakeModel;
 		std::unique_ptr<CMOModel>	m_foodModel;
+		std::unique_ptr<CMOModel>	m_wallModel;
 		Windows::Foundation::Point RandomPosition(int min, int max);
 		bool RenderFood(ID3D11DeviceContext* context);
+		void RenderBackground();
 		void Rotate(float radians);
 		std::unique_ptr<List> m_snake;
 		bool m_isNeedChangePos;

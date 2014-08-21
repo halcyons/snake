@@ -43,11 +43,52 @@ void Sample3DSceneRenderer::Move(int step, Direction direction)
 	// Change direction of header	
 	if (direction != (Direction)(-(int)m_snake->listHead->direction))
 	{
+		switch (direction)
+		{
+		case Snake::up:
+			if (m_snake->listHead->y > 10)
+			{
+				if (m_snake->listHead->z <= 10)
+				{
+					direction = Direction::in;
+				}
+				
+				else if (m_snake->listHead->z > 10)
+				{
+					direction = Direction::down;
+				}
+			}
+			else if (m_snake->listHead->y <= 10)
+			{
+				if (m_snake->listHead->z > 10)
+				{
+					direction = Direction::down;
+				}
+
+			}
+			
+			break;
+		case Snake::right:
+			break;
+		case Snake::in:
+			break;
+		case Snake::down:
+			if (m_snake->listHead->y < -10 && m_snake->listHead->z < 15)
+			{
+				direction = Direction::in;
+			}
+			break;
+		case Snake::left:
+			break;
+		case Snake::out:
+			break;
+		default:
+			break;
+		}
 		m_snake->listHead->direction = direction;
 
 		Move(step);
 	}
-	
 }
 
 
@@ -64,6 +105,8 @@ void Sample3DSceneRenderer::ScrollViewMatrix()
 {
 
 }
+
+
 
 // Initializes view parameters when the window size changes.
 void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
@@ -87,13 +130,13 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	// This sample makes use of a right-handed coordinate system using row-major matrices.
 	
-	XMMATRIX perspectiveMatrix = XMMatrixOrthographicLH(outputSize.Width / 30.f, outputSize.Height / 30.f, 0.01f, 1000.0f);
-	/*XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(
+	//XMMATRIX perspectiveMatrix = XMMatrixOrthographicLH(outputSize.Width / 30.f, outputSize.Height / 30.f, 0.01f, 1000.0f);
+	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(
 		fovAngleY,
 		aspectRatio,
 		0.01f,
 		100.0f
-		);*/
+		);
 
 	XMFLOAT4X4 orientation = m_deviceResources->GetOrientationTransform3D();
 
@@ -105,7 +148,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 		perspectiveMatrix * orientationMatrix
 		);
 
-	static const XMVECTORF32 eye = { 5.0f, 3.0f, -15.0f, 0.0f };
+	static const XMVECTORF32 eye = { -10.0f, 0.0f, -35.0f, 0.0f };
 	static const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
@@ -117,6 +160,14 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
+	////////////Update the view matrix
+	//XMVECTORF32 eye = { m_snake->listHead->x, m_snake->listHead->y, -15.0f, 0.0f };
+	//XMVECTORF32 at = { m_snake->listHead->x, m_snake->listHead->y, 0.0f, 0.0f };
+	//XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
+	////////////
+
 	double seconds = (timer.GetTotalSeconds());
 	
 	static int i = 0;
@@ -144,7 +195,6 @@ void Sample3DSceneRenderer::TrackingUpdate(float positionX)
 {
 	if (m_tracking)
 	{
-
 		//Move(0.1f, Direction::right, m_constantBufferData.model);
 
 		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
@@ -274,6 +324,28 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 	return true;
 }
 
+void Sample3DSceneRenderer::RenderBackground()
+{
+	auto context = m_deviceResources->GetD3DDeviceContext();
+	m_wallModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixIdentity(),
+		XMLoadFloat4x4(&m_constantBufferData.view),
+		XMLoadFloat4x4(&m_constantBufferData.projection),
+		[&](){
+
+		context->IASetInputLayout(m_modelInputLayout.Get());
+		context->VSSetShader(m_textureVertexShader.Get(), nullptr, 0);
+		context->PSSetSamplers(
+			0,                          // starting at the first sampler slot 
+			1,                          // set one sampler binding 
+			m_samplerState.GetAddressOf()
+			);
+		//context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
+		context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
+
+		context->RSSetState(m_rsState.Get());
+	});
+}
+
 // Renders one frame using the vertex and pixel shaders.
 bool Sample3DSceneRenderer::Render()
 {
@@ -285,9 +357,9 @@ bool Sample3DSceneRenderer::Render()
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	auto device = m_deviceResources->GetD3DDevice();
-
+	
 	RenderFood(context);
-
+	//RenderBackground();
 	Node* snakeNode = m_snake->listHead;
 	
 	for (int i = 0; i < m_snake->count; ++i)
@@ -298,7 +370,7 @@ bool Sample3DSceneRenderer::Render()
 		}
 
 		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->boundingBox.Extents.x * 2), 
-			(float)snakeNode->y * snakeNode->boundingBox.Extents.y * 2, 0.0f);
+			(float)snakeNode->y * snakeNode->boundingBox.Extents.y * 2, (float)snakeNode->z * snakeNode->boundingBox.Extents.z * 2);
 		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
 		
 		m_snakeModel->Draw(context, device, XMLoadFloat4x4(&m_constantBufferData.model),
@@ -411,6 +483,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	auto device = m_deviceResources->GetD3DDevice();
 	m_snakeModel = CMOModel::CreateFromCMO(device, L"CrateModel.cmo");
 	m_foodModel = CMOModel::CreateFromCMO(device, L"CrateModel.cmo");
+	m_wallModel = CMOModel::CreateFromCMO(device, L"wall.cmo");
 	GameInitialize(3);
 
 

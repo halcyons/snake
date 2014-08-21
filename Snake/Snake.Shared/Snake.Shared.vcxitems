@@ -80,5 +80,8 @@
       <FileType>Document</FileType>
     </MeshContentTask>
     <None Include="$(MSBuildThisFileDirectory)SnakeBody.FBX" />
+    <MeshContentTask Include="$(MSBuildThisFileDirectory)wall.FBX">
+      <FileType>Document</FileType>
+    </MeshContentTask>
   </ItemGroup>
 </Project>
