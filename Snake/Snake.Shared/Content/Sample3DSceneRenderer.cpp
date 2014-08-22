@@ -21,7 +21,8 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_tracking(false),
 	m_deviceResources(deviceResources),
 	m_isNeedChangePos(true),
-	m_isGameOver(false)
+	m_isGameOver(false),
+	m_isNeedTurnIn(false)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	CreateDeviceDependentResources();
@@ -41,54 +42,69 @@ void Sample3DSceneRenderer::Move(int step)
 void Sample3DSceneRenderer::Move(int step, Direction direction)
 {
 	// Change direction of header	
-	if (direction != (Direction)(-(int)m_snake->listHead->direction))
+	switch (direction)
 	{
-		switch (direction)
+	case Snake::up:
+		// When the snake reachs the top limit.
+		if (m_snake->listHead->y > 10)
 		{
-		case Snake::up:
-			if (m_snake->listHead->y > 10)
+			// When the snake is in the top plane.
+			if (m_snake->listHead->z <= 10)
 			{
-				if (m_snake->listHead->z <= 10)
-				{
-					direction = Direction::in;
-				}
-				
-				else if (m_snake->listHead->z > 10)
-				{
-					direction = Direction::down;
-				}
-			}
-			/*else if (m_snake->listHead->y <= 10)
-			{
-				if (m_snake->listHead->z > 10)
-				{
-					direction = Direction::down;
-				}
-
-			}*/
-			
-			break;
-		case Snake::right:
-			break;
-		case Snake::in:
-			break;
-		case Snake::down:
-			if (m_snake->listHead->y < -10 && m_snake->listHead->z < 15)
-			{
+				m_isNeedTurnIn = true;
 				direction = Direction::in;
 			}
-			break;
-		case Snake::left:
-			break;
-		case Snake::out:
-			break;
-		default:
-			break;
+			// When the snake reachs the back limit.
+			else if (m_snake->listHead->z > 10)
+			{
+				//m_isNeedTurnIn = false;
+				direction = Direction::down;
+			}
 		}
-		m_snake->listHead->direction = direction;
-
-		Move(step);
+		// When the snake is in the front/back plane.
+		else if (m_snake->listHead->y <= 10 && m_snake->listHead->y >= -10)
+		{
+			// In the back plane.
+			if (m_snake->listHead->z > 10)
+			{
+				direction = Direction::down;
+			}
+		}
+		// Reachs the bottom limit.
+		else if (m_snake->listHead->y < -10)
+		{			
+			// Reachs the front limit.
+			if (m_snake->listHead->z <= 0)
+			{
+				break;
+			}
+			direction = Direction::out;
+		}
+		break;
+	case Snake::right:
+		break;
+	case Snake::in:
+		break;
+	case Snake::down:
+		if (m_snake->listHead->y < -10 && m_snake->listHead->z < 15)
+		{
+			direction = Direction::in;
+		}
+		break;
+	case Snake::left:
+		break;
+	case Snake::out:
+		break;
+	default:
+		break;
 	}
+	if (direction == (Direction)(-(int)m_snake->listHead->direction))
+	{
+		return;
+	}
+	m_snake->listHead->direction = direction;
+
+	Move(step);
 }
 
 
@@ -101,9 +117,10 @@ void Sample3DSceneRenderer::GameInitialize(int snakeLength)
 	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox);
 }
 
-void Sample3DSceneRenderer::ScrollViewMatrix()
+void Sample3DSceneRenderer::ScrollViewMatrix(DirectX::XMFLOAT3 eye, DirectX::XMFLOAT3 at, DirectX::XMFLOAT3 up)
 {
-
+	XMMATRIX view = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&at), XMLoadFloat3(&up));
+	
 }
 
 
@@ -131,7 +148,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 	// This sample makes use of a right-handed coordinate system using row-major matrices.
 	
 	//XMMATRIX perspectiveMatrix = XMMatrixOrthographicLH(outputSize.Width / 30.f, outputSize.Height / 30.f, 0.01f, 1000.0f);
-	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(
+	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovRH(
 		fovAngleY,
 		aspectRatio,
 		0.01f,
@@ -145,16 +162,16 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	XMStoreFloat4x4(
 		&m_constantBufferData.projection,
-		perspectiveMatrix * orientationMatrix
+		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 		);
 
-	static const XMVECTORF32 eye = { -10.0f, 0.0f, -35.0f, 0.0f };
+	static const XMVECTORF32 eye = { 0.0f, 0.0f, -35.0f, 0.0f };
 	static const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixIdentity());
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixIdentity()));
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -167,31 +184,53 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 	switch (m_snake->listHead->direction)
 	{
 	case Direction::in:
-		eye = XMVectorSet( m_snake->listHead->x, m_snake->listHead->y + 15.0f, m_snake->listHead->z, 0.0f );
-		at = XMVectorSet( m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
-		up = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
+		if (m_isNeedTurnIn)
+		{
+			static float angle = 0.01f;
+			if (angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnIn = false;
+				break;
+			}
+			XMMATRIX rotation = XMMatrixRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), 0.01f);
+			XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixMultiply(XMLoadFloat4x4(&m_constantBufferData.view), rotation));
+			angle += 0.01f;
+			/*eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y + 15.0f, m_snake->listHead->z, 0.0f);
+			at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
+			up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+			XMMATRIX view = XMMatrixLookAtLH(eye, at, up);
+			int i = 0;*/
+		}
 		break;
-	case Direction::up:
+	/*case Direction::up:
 		eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z - 15.0f, 0.0f);
 		at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
 		up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 		break;
+	case Direction::down:
+		eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z + 15.0f, 0.0f);
+		at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
+		up = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+		break;*/
 	default:
 		break;
 	}
 	
 
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
+	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
 	//////////
-
-	double seconds = (timer.GetTotalSeconds());
-	
-	static int i = 0;
-	if ((int)seconds == i)
+	if (!m_isNeedTurnIn)
 	{
-		Move(1, m_snake->listHead->direction);
-		++i;
+		double seconds = (timer.GetTotalSeconds());
+
+		static int i = 0;
+		if ((int)seconds == i)
+		{
+			Move(1, m_snake->listHead->direction);
+			++i;
+		}
 	}
+	
 }
 
 // Rotate the 3D cube model a set amount of radians.
@@ -245,10 +284,8 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		} while ((m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listEnd)));
 		m_isNeedChangePos = false;
 	}
-	
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranslation(pt.X, pt.Y, 0.0f));
 
-	m_foodModel->Draw(context, m_deviceResources->GetD3DDevice(), XMLoadFloat4x4(&m_constantBufferData.model),
+	m_foodModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixTranspose(XMMatrixTranslation(pt.X, pt.Y, 0.0f)),
 		XMLoadFloat4x4(&m_constantBufferData.view),
 		XMLoadFloat4x4(&m_constantBufferData.projection),
 		[&](){
@@ -343,7 +380,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 void Sample3DSceneRenderer::RenderBackground()
 {
 	auto context = m_deviceResources->GetD3DDeviceContext();
-	m_wallModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixIdentity(),
+	m_wallModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixTranspose(XMMatrixIdentity()),
 		XMLoadFloat4x4(&m_constantBufferData.view),
 		XMLoadFloat4x4(&m_constantBufferData.projection),
 		[&](){
@@ -375,7 +412,7 @@ bool Sample3DSceneRenderer::Render()
 	auto device = m_deviceResources->GetD3DDevice();
 	
 	RenderFood(context);
-	RenderBackground();
+	//RenderBackground();
 	Node* snakeNode = m_snake->listHead;
 	
 	for (int i = 0; i < m_snake->count; ++i)
@@ -387,7 +424,7 @@ bool Sample3DSceneRenderer::Render()
 
 		XMMATRIX translation = XMMatrixTranslation((float)(snakeNode->x * snakeNode->boundingBox.Extents.x * 2), 
 			(float)snakeNode->y * snakeNode->boundingBox.Extents.y * 2, (float)snakeNode->z * snakeNode->boundingBox.Extents.z * 2);
-		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixMultiply(XMLoadFloat4x4(&m_model), translation));
+		XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(translation));
 		
 		m_snakeModel->Draw(context, device, XMLoadFloat4x4(&m_constantBufferData.model),
 			XMLoadFloat4x4(&m_constantBufferData.view),

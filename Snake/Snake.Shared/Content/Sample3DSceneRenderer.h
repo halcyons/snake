@@ -71,10 +71,10 @@ namespace Snake
 				node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
 				break;
 			case Direction::left:
-				node->SetCoordinate(listHead->x - 1, listHead->y, listHead->z);
+				node->SetCoordinate(listHead->x + 1, listHead->y, listHead->z);
 				break;
 			case Direction::right:
-				node->SetCoordinate(listHead->x + 1, listHead->y, listHead->z);
+				node->SetCoordinate(listHead->x - 1, listHead->y, listHead->z);
 				break;
 			case Direction::in:
 				node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
@@ -156,7 +156,7 @@ namespace Snake
 
 		void GameInitialize(int snakeLength);
 
-		void ScrollViewMatrix();
+		void ScrollViewMatrix(DirectX::XMFLOAT3 eye, DirectX::XMFLOAT3 at, DirectX::XMFLOAT3 up);
 
 
 		bool m_isGameOver;
@@ -213,6 +213,7 @@ namespace Snake
 		bool	m_loadingComplete;
 		float	m_degreesPerSecond;
 		bool	m_tracking;
+		bool	m_isNeedTurnIn;
 	};
 }
 

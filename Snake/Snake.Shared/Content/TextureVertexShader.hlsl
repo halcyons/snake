@@ -13,9 +13,9 @@ cbuffer MaterialVars : register (b0)
 
 cbuffer ModelViewProjectionConstantBuffer
 {
-	row_major float4x4 Model;
-	row_major float4x4 View;
-	row_major float4x4 Projection;
+	float4x4 Model;
+	float4x4 View;
+	float4x4 Projection;
 };
 
 // Per-vertex data used as input to the vertex shader.
