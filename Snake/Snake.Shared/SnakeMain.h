@@ -30,6 +30,7 @@ namespace Snake
 		virtual void OnDeviceLost();
 		virtual void OnDeviceRestored();
 		bool m_isGameOver;
+		SnakePlane m_snakePlane;
 	private:
 		void ProcessInput();
 		

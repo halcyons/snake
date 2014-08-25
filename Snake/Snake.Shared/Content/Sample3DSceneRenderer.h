@@ -19,6 +19,16 @@ namespace Snake
 		out = -3
 	};
 
+	enum SnakePlane
+	{
+		Front,
+		Back,
+		Top,
+		Bottom,
+		Left,
+		Right
+	};
+
 	struct Node
 	{
 		int x = 0;
@@ -45,6 +55,7 @@ namespace Snake
 		Node* listHead;
 		Node* listEnd;
 		int count = 1;
+		SnakePlane snakePlane = SnakePlane::Front;
 		List(int length, DirectX::BoundingBox boundingBox)
 		{			
 			listHead = new Node(boundingBox);
@@ -65,7 +76,27 @@ namespace Snake
 			switch (listHead->direction)
 			{
 			case Direction::up:
-				node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);				
+				switch (snakePlane)
+				{
+				case Snake::Front:
+					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
+					break;
+				case Snake::Back:
+					node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
+					break;
+				case Snake::Top:
+					node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
+					break;
+				case Snake::Bottom:
+					node->SetCoordinate(listHead->x, listHead->y, listHead->z - 1);
+					break;
+				case Snake::Left:
+					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
+					break;
+				case Snake::Right:
+					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
+					break;				
+				}								
 				break;
 			case Direction::down:
 				node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
@@ -134,6 +165,9 @@ namespace Snake
 		}
 
 	};
+
+
+
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
 	{
@@ -156,11 +190,11 @@ namespace Snake
 
 		void GameInitialize(int snakeLength);
 
-		void ScrollViewMatrix(DirectX::XMFLOAT3 eye, DirectX::XMFLOAT3 at, DirectX::XMFLOAT3 up);
+		void ScrollViewMatrix(DirectX::XMFLOAT3 axis, bool isClockwise);
 
 
 		bool m_isGameOver;
-
+	
 	private:
 		std::unique_ptr<CMOModel>	m_snakeModel;
 		std::unique_ptr<CMOModel>	m_foodModel;
@@ -214,6 +248,12 @@ namespace Snake
 		float	m_degreesPerSecond;
 		bool	m_tracking;
 		bool	m_isNeedTurnIn;
+		bool	m_isNeedTurnDown;
+		bool	m_isNeedTurnOut;
+		bool	m_isNeedTurnUp;
+		float	m_angle;
+		bool	m_isClockwise;
+		
 	};
 }
 

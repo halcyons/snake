@@ -12,6 +12,13 @@ using namespace Snake;
 using namespace DirectX;
 using namespace Windows::Foundation;
 
+const int TopBoundary = 10;
+const int BottomBoundary = -10;
+const int FrontBoundary = 0;
+const int BackBoundary = 10;
+const int LeftBoundary = 10;
+const int RightBoundary = -10;
+
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
@@ -22,7 +29,13 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_deviceResources(deviceResources),
 	m_isNeedChangePos(true),
 	m_isGameOver(false),
-	m_isNeedTurnIn(false)
+	
+	m_isNeedTurnIn(false),
+	m_isNeedTurnDown(false),
+	m_isNeedTurnOut(false),
+	m_isNeedTurnUp(false),
+	m_angle(0.01f),
+	m_isClockwise(true)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	CreateDeviceDependentResources();
@@ -41,63 +54,116 @@ void Sample3DSceneRenderer::Move(int step)
 // Move default model matrix
 void Sample3DSceneRenderer::Move(int step, Direction direction)
 {
-	// Change direction of header	
 	switch (direction)
 	{
 	case Snake::up:
-		// When the snake reachs the top limit.
-		if (m_snake->listHead->y > 10)
+		// When the snake is at the front plane.
+		if (m_snake->listHead->z == FrontBoundary)
 		{
-			// When the snake is in the top plane.
-			if (m_snake->listHead->z <= 10)
+			// When the snake jsut reachs the top limit. 
+			if (m_snake->listHead->y == TopBoundary)
 			{
+				m_snake->snakePlane = SnakePlane::Top;
+				m_isClockwise = true;
 				m_isNeedTurnIn = true;
-				direction = Direction::in;
-			}
-			// When the snake reachs the back limit.
-			else if (m_snake->listHead->z > 10)
-			{
-				//m_isNeedTurnIn = false;
-				direction = Direction::down;
 			}
 		}
-		// When the snake is in the front/back plane.
-		else if (m_snake->listHead->y <= 10 && m_snake->listHead->y >= -10)
+		// When the snake is at the top plane.
+		else if (m_snake->listHead->y == TopBoundary)
 		{
-			// In the back plane.
-			if (m_snake->listHead->z > 10)
+			// When the snake just reachs the back limit.
+			if (m_snake->listHead->z == BackBoundary)
 			{
-				direction = Direction::down;
+				m_snake->snakePlane = SnakePlane::Back;
+				m_isClockwise = true;
+				m_isNeedTurnDown = true;
 			}
 		}
-		// Reachs the bottom limit.
-		else if (m_snake->listHead->y < -10)
-		{			
-			// Reachs the front limit.
-			if (m_snake->listHead->z <= 0)
+		// When the snake is at the back plane.
+		else if (m_snake->listHead->z == BackBoundary)
+		{
+			// When the snake just reachs the bottom limit.
+			if (m_snake->listHead->y == BottomBoundary)
 			{
-				break;
+				m_snake->snakePlane = SnakePlane::Bottom;
+				m_isClockwise = true;
+				m_isNeedTurnOut = true;
 			}
-			direction = Direction::out;
 		}
+		// When the snake is at the bottom plane.
+		else if (m_snake->listHead->y == BottomBoundary)
+		{
+			// When the snake just reachs the front limit.
+			if (m_snake->listHead->z == FrontBoundary)
+			{
+				m_snake->snakePlane = SnakePlane::Front;
+				m_isClockwise = true;
+				m_isNeedTurnUp = true;
+			}
+		}
+		
 		break;
 	case Snake::right:
 		break;
 	case Snake::in:
+		// When the snake is at the back plane.
+		if (m_snake->listHead->z == BackBoundary )
+		{
+			// When the snake just reachs the back limit.
+			// And the snake was at the top plane.
+			if (m_snake->listHead->y == TopBoundary)
+			{
+				m_isClockwise = true;
+				m_isNeedTurnDown = true;
+			}
+			
+			direction = Direction::down;
+		}
 		break;
 	case Snake::down:
-		if (m_snake->listHead->y < -10 && m_snake->listHead->z < 15)
+		// When the snake is at the bottom plane.
+		if (m_snake->listHead->y == BottomBoundary)
 		{
-			direction = Direction::in;
+			// When the snake just reachs the bottom limit.
+			// And the snake was at the back plane
+			if (m_snake->listHead->z == BackBoundary)
+			{
+				m_isClockwise = true;
+				m_isNeedTurnOut = true;
+				direction = Direction::out;
+			}
+			// When the snake was at the front plane
+			else if (m_snake->listHead->z == FrontBoundary)
+			{
+				m_isClockwise = false;
+				m_isNeedTurnIn = true;
+				direction = Direction::in;
+			}
+			
+			
 		}
 		break;
 	case Snake::left:
 		break;
 	case Snake::out:
+		
+		if (m_snake->listHead->z == FrontBoundary)
+		{
+			// When the snake just reachs the front limit.
+			// And the snake was at the bottom plane.
+			if (m_snake->listHead->y == BottomBoundary)
+			{
+				m_isClockwise = true;
+				m_isNeedTurnUp = true;
+			}
+			
+			direction = Direction::up;
+		}
 		break;
 	default:
 		break;
 	}
+	// Change direction of header	
 	if (direction == (Direction)(-(int)m_snake->listHead->direction))
 	{
 		return;
@@ -117,9 +183,12 @@ void Sample3DSceneRenderer::GameInitialize(int snakeLength)
 	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox);
 }
 
-void Sample3DSceneRenderer::ScrollViewMatrix(DirectX::XMFLOAT3 eye, DirectX::XMFLOAT3 at, DirectX::XMFLOAT3 up)
+void Sample3DSceneRenderer::ScrollViewMatrix(DirectX::XMFLOAT3 axis, bool isClockwise)
 {
-	XMMATRIX view = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&at), XMLoadFloat3(&up));
+	float angle = isClockwise ? 0.01f : -0.01f;
+	XMMATRIX rotation = XMMatrixRotationAxis(XMLoadFloat3(&axis), angle);
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixMultiply(XMLoadFloat4x4(&m_constantBufferData.view), rotation));
+
 	
 }
 
@@ -178,23 +247,23 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
 	//////////Update the view matrix
-	XMVECTOR eye;
-	XMVECTOR at;
-	XMVECTOR up;
+	//XMVECTOR eye;
+	//XMVECTOR at;
+	//XMVECTOR up;
+	
 	switch (m_snake->listHead->direction)
 	{
 	case Direction::in:
 		if (m_isNeedTurnIn)
-		{
-			static float angle = 0.01f;
-			if (angle >= XM_PIDIV2)
+		{			
+			if (m_angle >= XM_PIDIV2)
 			{
 				m_isNeedTurnIn = false;
+				m_angle = 0.01f;
 				break;
 			}
-			XMMATRIX rotation = XMMatrixRotationAxis(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), 0.01f);
-			XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixMultiply(XMLoadFloat4x4(&m_constantBufferData.view), rotation));
-			angle += 0.01f;
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
 			/*eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y + 15.0f, m_snake->listHead->z, 0.0f);
 			at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
 			up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
@@ -202,16 +271,83 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 			int i = 0;*/
 		}
 		break;
-	/*case Direction::up:
-		eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z - 15.0f, 0.0f);
-		at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
-		up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	case Direction::up:
+		if (m_isNeedTurnIn)
+		{
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnIn = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+			/*eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y + 15.0f, m_snake->listHead->z, 0.0f);
+			at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
+			up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+			XMMATRIX view = XMMatrixLookAtLH(eye, at, up);
+			int i = 0;*/
+		}
+		else if (m_isNeedTurnUp)
+		{			
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnUp = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+		}
+		else if (m_isNeedTurnDown)
+		{
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnDown = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+		}
+		else if (m_isNeedTurnOut)
+		{
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnOut = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+		}
 		break;
 	case Direction::down:
-		eye = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z + 15.0f, 0.0f);
-		at = XMVectorSet(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z, 0.0f);
-		up = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-		break;*/
+		if (m_isNeedTurnDown)
+		{
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnDown = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+		}
+		break;
+	case Direction::out:
+		if (m_isNeedTurnOut)
+		{
+			if (m_angle >= XM_PIDIV2)
+			{
+				m_isNeedTurnOut = false;
+				m_angle = 0.01f;
+				break;
+			}
+			ScrollViewMatrix(XMFLOAT3(1.0f, 0.0f, 0.0f), m_isClockwise);
+			m_angle += 0.01f;
+		}
+		break;
 	default:
 		break;
 	}
@@ -219,17 +355,20 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 
 	//XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixLookAtLH(eye, at, up));
 	//////////
-	if (!m_isNeedTurnIn)
-	{
-		double seconds = (timer.GetTotalSeconds());
+	
+	
+	double seconds = (timer.GetTotalSeconds());
 
-		static int i = 0;
-		if ((int)seconds == i)
+	static int i = 0;
+	if ((int)seconds == i)
+	{
+		if (!m_isNeedTurnIn && !m_isNeedTurnDown && !m_isNeedTurnOut && !m_isNeedTurnUp)
 		{
 			Move(1, m_snake->listHead->direction);
-			++i;
 		}
+		++i;
 	}
+	
 	
 }
 

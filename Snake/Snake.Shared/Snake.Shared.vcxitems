@@ -66,6 +66,7 @@
     <Image Include="$(MSBuildThisFileDirectory)head.jpg" />
     <Image Include="$(MSBuildThisFileDirectory)snake_body.jpg" />
     <Image Include="$(MSBuildThisFileDirectory)texture.jpg" />
+    <Image Include="$(MSBuildThisFileDirectory)wall.jpg" />
   </ItemGroup>
   <ItemGroup>
     <MeshContentTask Include="$(MSBuildThisFileDirectory)SnakeBody.FBX">
