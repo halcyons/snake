@@ -92,6 +92,7 @@ bool SnakeMain::Render()
 	if (m_sceneRenderer->Render())
 	{
 		m_isGameOver = m_sceneRenderer->m_isGameOver;
+		m_snakePlane = m_sceneRenderer->m_snakePlane;
 	}	
 	return true;
 }

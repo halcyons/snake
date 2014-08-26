@@ -252,7 +252,21 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 	// figure out the command from the keyboard
 	if (key == Windows::System::VirtualKey::W || key == Windows::System::VirtualKey::Up)		// forward
 	{
-		m_main->Move(1, Direction::up);
+		switch (m_main->m_snakePlane)
+		{
+		case SnakePlane::Front:
+			m_main->Move(1, Direction::up);
+			break;
+		case SnakePlane::Top:
+			m_main->Move(1, Direction::in);
+			break;
+		case SnakePlane::Back:
+			m_main->Move(1, Direction::down);
+			break;
+		case SnakePlane::Bottom:
+			m_main->Move(1, Direction::out);
+			break;
+		}		
 	}
 		
 	if (key == Windows::System::VirtualKey::S || key == Windows::System::VirtualKey::Down)		// back

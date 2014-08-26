@@ -55,7 +55,6 @@ namespace Snake
 		Node* listHead;
 		Node* listEnd;
 		int count = 1;
-		SnakePlane snakePlane = SnakePlane::Front;
 		List(int length, DirectX::BoundingBox boundingBox)
 		{			
 			listHead = new Node(boundingBox);
@@ -76,27 +75,7 @@ namespace Snake
 			switch (listHead->direction)
 			{
 			case Direction::up:
-				switch (snakePlane)
-				{
-				case Snake::Front:
-					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
-					break;
-				case Snake::Back:
-					node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
-					break;
-				case Snake::Top:
-					node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
-					break;
-				case Snake::Bottom:
-					node->SetCoordinate(listHead->x, listHead->y, listHead->z - 1);
-					break;
-				case Snake::Left:
-					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
-					break;
-				case Snake::Right:
-					node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
-					break;				
-				}								
+				node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
 				break;
 			case Direction::down:
 				node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
@@ -190,11 +169,11 @@ namespace Snake
 
 		void GameInitialize(int snakeLength);
 
-		void ScrollViewMatrix(DirectX::XMFLOAT3 axis, bool isClockwise);
+		void ScrollViewMatrix(DirectX::XMFLOAT3 axis, int isClockwise);
 
 
 		bool m_isGameOver;
-	
+		SnakePlane m_snakePlane;
 	private:
 		std::unique_ptr<CMOModel>	m_snakeModel;
 		std::unique_ptr<CMOModel>	m_foodModel;
@@ -252,7 +231,13 @@ namespace Snake
 		bool	m_isNeedTurnOut;
 		bool	m_isNeedTurnUp;
 		float	m_angle;
-		bool	m_isClockwise;
+
+		// 0: Need not to rotate the view matrix.
+		// 1: Clockwise rotate the view.
+		// 2: Counterclockwise roate.
+		int		m_isClockwise;
+		bool	m_isScrolling;
+		
 		
 	};
 }
