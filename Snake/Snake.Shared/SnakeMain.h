@@ -23,7 +23,7 @@ namespace Snake
 		void Update();
 		bool Render();
 
-		
+		void ChangeDirection(Direction direction){ m_sceneRenderer->ChangeDirection(direction); }
 		void Move(int step, Direction direction) { m_sceneRenderer->Move(step, direction); }
 
 		// IDeviceNotify

@@ -166,10 +166,11 @@ namespace Snake
 		
 		void Move(int step);
 		void Move(int step, Direction direction);
+		void ChangeDirection(Direction direction);
 
 		void GameInitialize(int snakeLength);
 
-		void ScrollViewMatrix(DirectX::XMFLOAT3 axis, int isClockwise);
+		void ScrollViewMatrix();
 
 
 		bool m_isGameOver;
@@ -226,18 +227,10 @@ namespace Snake
 		bool	m_loadingComplete;
 		float	m_degreesPerSecond;
 		bool	m_tracking;
-		bool	m_isNeedTurnIn;
-		bool	m_isNeedTurnDown;
-		bool	m_isNeedTurnOut;
-		bool	m_isNeedTurnUp;
+		bool	m_isNeedScroll;
 		float	m_angle;
 
-		// 0: Need not to rotate the view matrix.
-		// 1: Clockwise rotate the view.
-		// 2: Counterclockwise roate.
-		int		m_isClockwise;
-		bool	m_isScrolling;
-		
+		DirectX::XMFLOAT4X4 m_viewRotation;
 		
 	};
 }
