@@ -57,99 +57,117 @@ void Sample3DSceneRenderer::Move(int step, Direction direction)
 	float angle = 0.0f; // The angle need to rotate per frame.
 	XMVECTOR axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f); // Rotate around this axis.
 
-	// When the snake is at the front plane.
-	if (m_snake->listHead->z == FrontBoundary)
+
+	// When the snake just reachs the right limit.
+	if (m_snake->listHead->x == RightBoundary && m_snake->listHead->direction == Direction::right)
 	{
-		// When the snake just reachs the top limit. 
-		if (m_snake->listHead->y == TopBoundary && m_snake->listHead->direction == Direction::up)
+		m_isGameOver = true;
+	}
+	// When the snake just reachs the left limit.
+	else if (m_snake->listHead->x == LeftBoundary && m_snake->listHead->direction == Direction::left)
+	{
+		m_isGameOver = true;
+	}
+	else
+	{
+		// When the snake is at the front plane.
+		if (m_snake->listHead->z == FrontBoundary)
 		{
-			m_snakePlane = SnakePlane::Top;
-			direction = Direction::in;
-			m_isNeedScroll = true;
-			angle = 0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			// When the snake just reachs the top limit. 
+			if (m_snake->listHead->y == TopBoundary && m_snake->listHead->direction == Direction::up)
+			{
+				m_snakePlane = SnakePlane::Top;
+				direction = Direction::in;
+				m_isNeedScroll = true;
+				angle = 0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+			// When the snake just reachs the bottom limit.
+			else if (m_snake->listHead->y == BottomBoundary && m_snake->listHead->direction == Direction::down)
+			{
+				m_snakePlane = SnakePlane::Bottom;
+				direction = Direction::in;
+				m_isNeedScroll = true;
+				angle = -0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
 		}
-		// When the snake just reachs the bottom limit.
-		else if (m_snake->listHead->y == BottomBoundary && m_snake->listHead->direction == Direction::down)
+
+		// When the snake is at the top plane.
+		if (m_snake->listHead->y == TopBoundary)
 		{
-			m_snakePlane = SnakePlane::Bottom;
-			direction = Direction::in;
-			m_isNeedScroll = true;
-			angle = -0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			// When the snake just reachs the back limit.
+			if (m_snake->listHead->z == BackBoundary && m_snake->listHead->direction == Direction::in)
+			{
+				m_snakePlane = SnakePlane::Back;
+				direction = Direction::down;
+				m_isNeedScroll = true;
+				angle = 0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+			// When the snake just reachs the front limit.
+			else if (m_snake->listHead->z == FrontBoundary && m_snake->listHead->direction == Direction::out)
+			{
+				m_snakePlane = SnakePlane::Front;
+				direction = Direction::down;
+				m_isNeedScroll = true;
+				angle = -0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+
 		}
+
+		// When the snake is at the back plane.
+		if (m_snake->listHead->z == BackBoundary)
+		{
+			// When the snake just reachs the bottom limit.
+			if (m_snake->listHead->y == BottomBoundary && m_snake->listHead->direction == Direction::down)
+			{
+				m_snakePlane = SnakePlane::Bottom;
+				direction = Direction::out;
+				m_isNeedScroll = true;
+				angle = 0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+			// When the snake just reachs the top limit.
+			else if (m_snake->listHead->y == TopBoundary && m_snake->listHead->direction == Direction::up)
+			{
+				m_snakePlane = SnakePlane::Top;
+				direction = Direction::out;
+				m_isNeedScroll = true;
+				angle = -0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+
+		}
+
+		// When the snake is at the bottom plane.
+		if (m_snake->listHead->y == BottomBoundary)
+		{
+			// When the snake just reachs the front limit.
+			if (m_snake->listHead->z == FrontBoundary && m_snake->listHead->direction == Direction::out)
+			{
+				m_snakePlane = SnakePlane::Front;
+				direction = Direction::up;
+				m_isNeedScroll = true;
+				angle = 0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+			//  When the snake just reachs the back limit.
+			else if (m_snake->listHead->z == BackBoundary && m_snake->listHead->direction == Direction::in)
+			{
+				m_snakePlane = SnakePlane::Back;
+				direction = Direction::up;
+				m_isNeedScroll = true;
+				angle = -0.1f;
+				axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+			}
+
+		}
+
 	}
 
-	// When the snake is at the top plane.
-	if (m_snake->listHead->y == TopBoundary)
-	{
-		// When the snake just reachs the back limit.
-		if (m_snake->listHead->z == BackBoundary && m_snake->listHead->direction == Direction::in)
-		{
-			m_snakePlane = SnakePlane::Back;
-			direction = Direction::down;
-			m_isNeedScroll = true;
-			angle = 0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-		// When the snake just reachs the front limit.
-		else if (m_snake->listHead->z == FrontBoundary && m_snake->listHead->direction == Direction::out)
-		{
-			m_snakePlane = SnakePlane::Front;
-			direction = Direction::down;
-			m_isNeedScroll = true;
-			angle = -0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-
-	}
-
-	// When the snake is at the back plane.
-	if (m_snake->listHead->z == BackBoundary)
-	{
-		// When the snake just reachs the bottom limit.
-		if (m_snake->listHead->y == BottomBoundary && m_snake->listHead->direction == Direction::down)
-		{
-			m_snakePlane = SnakePlane::Bottom;
-			direction = Direction::out;
-			m_isNeedScroll = true;
-			angle = 0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-		// When the snake just reachs the top limit.
-		else if (m_snake->listHead->y == TopBoundary && m_snake->listHead->direction == Direction::up)
-		{
-			m_snakePlane = SnakePlane::Top;
-			direction = Direction::out;
-			m_isNeedScroll = true;
-			angle = -0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-
-	}
-
-	// When the snake is at the bottom plane.
-	if (m_snake->listHead->y == BottomBoundary)
-	{
-		// When the snake just reachs the front limit.
-		if (m_snake->listHead->z == FrontBoundary && m_snake->listHead->direction == Direction::out)
-		{
-			m_snakePlane = SnakePlane::Front;
-			direction = Direction::up;
-			m_isNeedScroll = true;
-			angle = 0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-		//  When the snake just reachs the back limit.
-		else if (m_snake->listHead->z == BackBoundary && m_snake->listHead->direction == Direction::in)
-		{
-			m_snakePlane = SnakePlane::Back;
-			direction = Direction::up;
-			m_isNeedScroll = true;
-			angle = -0.1f;
-			axis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		}
-	}
+	
 
 	XMStoreFloat4x4(&m_viewRotation, XMMatrixRotationAxis(axis, angle));
 
@@ -180,6 +198,10 @@ void Sample3DSceneRenderer::GameInitialize(int snakeLength)
 		m_snake.release();
 	}
 	m_snake = std::make_unique<List>(snakeLength, m_snakeModel->meshes[0]->BoundingBox);
+	m_isGameOver = false;
+	ResetViewMatrix();
+	m_snakePlane = SnakePlane::Front;
+	m_isNeedChangePos = true;
 }
 
 void Sample3DSceneRenderer::ScrollViewMatrix()
@@ -195,7 +217,14 @@ void Sample3DSceneRenderer::ScrollViewMatrix()
 	m_angle += 0.1f;
 }
 
+void Sample3DSceneRenderer::ResetViewMatrix()
+{
+	const XMVECTORF32 eye = { 0.0f, 0.0f, -35.0f, 0.0f };
+	const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
+	const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+}
 
 // Initializes view parameters when the window size changes.
 void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
@@ -237,11 +266,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 		);
 
-	static const XMVECTORF32 eye = { 0.0f, 0.0f, -35.0f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
-	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
-
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+	ResetViewMatrix();
 
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixIdentity()));
 }
@@ -341,78 +366,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
 
 		context->RSSetState(m_rsState.Get());
-	});
-
-	//// Each vertex is one instance of the FoodVertex struct.
-	//UINT stride = sizeof(FoodVertex);
-	//UINT offset = 0;
-	//context->IASetVertexBuffers(
-	//	0,
-	//	1,
-	//	m_foodVertexBuffer.GetAddressOf(),
-	//	&stride,
-	//	&offset
-	//	);
-
-	//context->IASetIndexBuffer(
-	//	m_foodIndexBuffer.Get(),
-	//	DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
-	//	0
-	//	);
-
-	//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//context->IASetInputLayout(m_foodInputLayout.Get());
-
-	//// Attach our vertex shader.
-	//context->VSSetShader(
-	//	m_foodVertexShader.Get(),
-	//	nullptr,
-	//	0
-	//	);
-
-	//context->RSSetState(m_rsState.Get());
-
-	//// Attach our pixel shader.
-	//context->PSSetShader(
-	//	m_foodPixelShader.Get(),
-	//	nullptr,
-	//	0
-	//	);
-
-	//context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
-
-	//context->PSSetSamplers(
-	//	0,                          // starting at the first sampler slot 
-	//	1,                          // set one sampler binding 
-	//	m_samplerState.GetAddressOf()
-	//	);
-
-	//
-	//// Prepare the constant buffer to send it to the graphics device.
-	//context->UpdateSubresource(
-	//	m_constantBuffer.Get(),
-	//	0,
-	//	NULL,
-	//	&m_constantBufferData,
-	//	0,
-	//	0
-	//	);
-
-
-	//// Send the constant buffer to the graphics device.
-	//context->VSSetConstantBuffers(
-	//	0,
-	//	1,
-	//	m_constantBuffer.GetAddressOf()
-	//	);
-
-	//// Draw the objects.
-	//context->DrawIndexed(
-	//	m_foodIndexCount,
-	//	0,
-	//	0
-	//	);
+	});	
 
 	return true;
 }
@@ -496,10 +450,7 @@ bool Sample3DSceneRenderer::Render()
 	{
 		m_isGameOver = true;
 	}
-	else
-	{
-		m_isGameOver = false;
-	}
+	
 	return true;
 }
 

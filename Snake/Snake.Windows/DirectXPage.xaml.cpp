@@ -266,6 +266,9 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		case SnakePlane::Bottom:
 			m_main->Move(1, Direction::out);
 			break;
+		default:
+			m_main->Move(1, Direction::up);
+			break;
 		}		
 	}
 		
@@ -285,12 +288,42 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		case SnakePlane::Bottom:
 			m_main->Move(1, Direction::in);
 			break;
+		default:
+			m_main->Move(1, Direction::down);
+			break;
 		}
 	}		
 	if (key == Windows::System::VirtualKey::A || key == Windows::System::VirtualKey::Left)		// left
-		m_main->Move(1, Direction::left);
+	{
+		switch (m_main->m_snakePlane)
+		{
+		case SnakePlane::Left:
+			m_main->Move(1, Direction::in);
+			break;
+		case SnakePlane::Right:
+			m_main->Move(1, Direction::out);
+			break;
+		
+		default:
+			m_main->Move(1, Direction::left);
+			break;
+		}
+	}
 	if (key == Windows::System::VirtualKey::D || key == Windows::System::VirtualKey::Right)		// right
-		m_main->Move(1, Direction::right);
+	{
+		switch (m_main->m_snakePlane)
+		{
+		case SnakePlane::Left:
+			m_main->Move(1, Direction::out);
+			break;
+		case SnakePlane::Right:
+			m_main->Move(1, Direction::in);
+			break;
+		default:
+			m_main->Move(1, Direction::right);
+			break;
+		}
+	}
 }
 
 

@@ -183,6 +183,8 @@ namespace Snake
 		bool RenderFood(ID3D11DeviceContext* context);
 		void RenderBackground();
 		void Rotate(float radians);
+		void ResetViewMatrix();
+
 		std::unique_ptr<List> m_snake;
 		bool m_isNeedChangePos;
 
