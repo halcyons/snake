@@ -209,14 +209,15 @@ namespace Snake
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_foodIndexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_textureVertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_texturePixelShader;
-		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_foodVertexShader;
-		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_foodPixelShader;
+		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_normalVertexShader;
+		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_normalPixelShader;
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_bodySRV;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_foodSRV;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>		m_samplerState;
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rsState;
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_dsState;
+		Microsoft::WRL::ComPtr<ID3D11BlendState>		m_blendState;
 
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;

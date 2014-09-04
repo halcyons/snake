@@ -16,8 +16,8 @@ const int TopBoundary = 10;
 const int BottomBoundary = -10;
 const int FrontBoundary = 0;
 const int BackBoundary = 10;
-const int LeftBoundary = 10;
-const int RightBoundary = -10;
+const int LeftBoundary = 30;
+const int RightBoundary = -30;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
@@ -380,14 +380,16 @@ void Sample3DSceneRenderer::RenderBackground()
 		[&](){
 
 		context->IASetInputLayout(m_modelInputLayout.Get());
-		context->VSSetShader(m_textureVertexShader.Get(), nullptr, 0);
-		context->PSSetSamplers(
-			0,                          // starting at the first sampler slot 
-			1,                          // set one sampler binding 
-			m_samplerState.GetAddressOf()
-			);
+		context->VSSetShader(m_normalVertexShader.Get(), nullptr, 0);
+		//context->PSSetSamplers(
+		//	0,                          // starting at the first sampler slot 
+		//	1,                          // set one sampler binding 
+		//	m_samplerState.GetAddressOf()
+		//	);
 		//context->PSSetShaderResources(0, 1, m_foodSRV.GetAddressOf());
-		context->PSSetShader(m_texturePixelShader.Get(), nullptr, 0);
+		context->PSSetShader(m_normalPixelShader.Get(), nullptr, 0);
+		
+		context->OMSetBlendState(m_blendState.Get(), nullptr, 0xffffffff);
 
 		context->RSSetState(m_rsState.Get());
 	});
@@ -406,7 +408,7 @@ bool Sample3DSceneRenderer::Render()
 	auto device = m_deviceResources->GetD3DDevice();
 	
 	RenderFood(context);
-	//RenderBackground();
+	RenderBackground();
 	Node* snakeNode = m_snake->listHead;
 	
 	for (int i = 0; i < m_snake->count; ++i)
@@ -628,48 +630,33 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 
 
 	// Food vertex initialization.
-	auto LoadFoodVS = DX::ReadDataAsync(L"FoodVertexShader.cso");
-	auto LoadFoodPS = DX::ReadDataAsync(L"FoodPixelShader.cso");
+	auto LoadNormalVS = DX::ReadDataAsync(L"NormalVertexShader.cso");
+	auto LoadNormalPS = DX::ReadDataAsync(L"NormalPixelShader.cso");
 
-	auto createFoodVS = LoadFoodVS.then([this](const std::vector<byte>& fileData){
+	auto createNormalVS = LoadNormalVS.then([this](const std::vector<byte>& fileData){
 		DX::ThrowIfFailed(
 			m_deviceResources->GetD3DDevice()->CreateVertexShader(
 			&fileData[0],
 			fileData.size(),
 			nullptr,
-			&m_foodVertexShader
+			&m_normalVertexShader
 			)
 			);
-
-		static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateInputLayout(
-			vertexDesc,
-			ARRAYSIZE(vertexDesc),
-			&fileData[0],
-			fileData.size(),
-			&m_foodInputLayout
-			)
-			);
+		
 	});
 	
-	auto createFoodPS = LoadFoodPS.then([this](const std::vector<byte>& fileData) {
+	auto createNormalPS = LoadNormalPS.then([this](const std::vector<byte>& fileData) {
 		DX::ThrowIfFailed(
 			m_deviceResources->GetD3DDevice()->CreatePixelShader(
 			&fileData[0],
 			fileData.size(),
 			nullptr,
-			&m_foodPixelShader
+			&m_normalPixelShader
 			)
 			);		
 	});
 
-	auto createFoodCube = (createFoodVS && createFoodPS).then([this](){
+	auto createFoodCube = (createNormalVS && createNormalPS).then([this](){
 		static const FoodVertex cubeVertices[] =
 		{
 			// -z
@@ -834,6 +821,23 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	
 	DX::ThrowIfFailed(
 		device->CreateDepthStencilState(&dsDesc, &m_dsState)
+		);
+
+	// Blend state.
+	D3D11_BLEND_DESC blendDesc = {};
+	ZeroMemory(&blendDesc, sizeof(blendDesc));
+
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	DX::ThrowIfFailed(
+		device->CreateBlendState(&blendDesc, &m_blendState)
 		);
 }
 

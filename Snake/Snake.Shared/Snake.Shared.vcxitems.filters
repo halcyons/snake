@@ -51,14 +51,14 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
       <Filter>Content</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodPixelShader.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodVertexShader.hlsl">
-      <Filter>Content</Filter>
-    </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\TexturePixelShader.hlsl" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\TextureVertexShader.hlsl" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\NormalPixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\NormalVertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

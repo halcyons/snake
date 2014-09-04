@@ -44,11 +44,13 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SampleVertexShader.hlsl">
       <ShaderType>Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodPixelShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\NormalPixelShader.hlsl">
       <ShaderType>Pixel</ShaderType>
+      <FileType>Document</FileType>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Content\FoodVertexShader.hlsl">
+    <FxCompile Include="$(MSBuildThisFileDirectory)Content\NormalVertexShader.hlsl">
       <ShaderType>Vertex</ShaderType>
+      <FileType>Document</FileType>
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\TexturePixelShader.hlsl">
       <ShaderType>Pixel</ShaderType>
