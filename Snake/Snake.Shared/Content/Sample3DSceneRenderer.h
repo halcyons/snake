@@ -8,7 +8,6 @@
 #include "Common\LoadCMOModel.h"
 namespace Snake
 {
-	const float sizeNODE_SIZE = 1.0f;
 	enum Direction
 	{
 		up = 1,
@@ -143,9 +142,22 @@ namespace Snake
 			return false;
 		}
 
+		bool Contains(XMFLOAT3 pt)
+		{
+			Node* tempNode = listHead;
+			for (int i = 0; i < count; ++i)
+			{				
+				if (tempNode->x == pt.x && tempNode->y == pt.y && tempNode->z == pt.z)
+				{
+					return true;
+				}
+				tempNode = tempNode->next;
+			}
+			return false;
+		}
 	};
 
-
+	
 
 	// This sample renderer instantiates a basic rendering pipeline.
 	class Sample3DSceneRenderer
@@ -185,6 +197,9 @@ namespace Snake
 		void Rotate(float radians);
 		void ResetViewMatrix();
 
+		std::vector<XMFLOAT3> SurroundPoints(XMFLOAT3 pt);
+		bool IsAvailable(XMFLOAT3 pt);
+		std::vector<XMFLOAT3> PathFinding();
 		std::unique_ptr<List> m_snake;
 		bool m_isNeedChangePos;
 

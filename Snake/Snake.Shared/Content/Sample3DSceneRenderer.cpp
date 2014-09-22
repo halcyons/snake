@@ -226,6 +226,49 @@ void Sample3DSceneRenderer::ResetViewMatrix()
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 }
 
+bool Sample3DSceneRenderer::IsAvailable(XMFLOAT3 pt)
+{
+	if (m_snake->Contains(pt))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+std::vector<XMFLOAT3> Sample3DSceneRenderer::SurroundPoints(XMFLOAT3 pt)
+{
+	std::vector<XMFLOAT3> pts;
+	// Right
+	XMFLOAT3 tempPt(pt.x + 1, pt.y, pt.z);
+	if (IsAvailable(tempPt))
+	{
+		pts.push_back(tempPt);
+	}
+	// Left
+	tempPt = XMFLOAT3(pt.x - 1, pt.y, pt.z);
+	if (IsAvailable(tempPt))
+	{
+		pts.push_back(tempPt);
+	}
+	// Up
+	tempPt = XMFLOAT3(pt.x, pt.y + 1, pt.z);
+	if (IsAvailable(tempPt))
+	{
+		pts.push_back(tempPt);
+	}
+	// Down
+	tempPt = XMFLOAT3(pt.x, pt.y - 1, pt.z);
+	if (IsAvailable(tempPt))
+	{
+		pts.push_back(tempPt);
+	}
+
+	return pts;
+}
+
 // Initializes view parameters when the window size changes.
 void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 {
@@ -347,6 +390,13 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 			m_foodBB = m_foodModel->meshes[0]->BoundingBox;
 			m_foodBB.Center = XMFLOAT3(pt.X, pt.Y, 0.0f);
 		} while ((m_snake->IsCollideWithBB(m_foodBB, m_snake->listHead, m_snake->listEnd)));
+
+		// Set the PathNodes' start.
+		m_pathNodes.clear();
+		PathFindNode* node = new PathFindNode();
+		node->position = XMFLOAT3(m_snake->listHead->x, m_snake->listHead->y, m_snake->listHead->z);
+		m_pathNodes.push_back(node);
+
 		m_isNeedChangePos = false;
 	}
 

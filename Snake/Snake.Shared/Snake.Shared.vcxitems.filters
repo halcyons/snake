@@ -25,6 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PathFinding.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
@@ -43,6 +44,7 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PathFinding.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">

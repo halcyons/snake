@@ -17,11 +17,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PathFinding.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\dds.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PathFinding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pch.h" />
