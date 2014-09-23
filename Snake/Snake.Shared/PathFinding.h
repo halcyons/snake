@@ -4,6 +4,19 @@ struct PathFindNode
 	PathFindNode* parent = nullptr;
 	XMFLOAT3 position{ 0.0f, 0.0f, 0.0f };
 	int weight = 0;
+	int gWeight = 0;
+	const bool operator > (const PathFindNode& node)
+	{
+		return this->weight > node.weight;
+	}
+	const bool operator < (const PathFindNode& node)
+	{
+		return this->weight < node.weight;
+	}
+	const bool operator == (const PathFindNode& node)
+	{
+		return this->weight == node.weight;
+	}
 	std::vector<PathFindNode*> SurroundPoints()
 	{
 		std::vector<PathFindNode*> nodes;
@@ -30,9 +43,22 @@ struct PathFindNode
 		return nodes;
 	}
 
-	void CalculateWeight(XMFLOAT3 goal)
+	int GetgWeightThrough(XMFLOAT3 start, XMFLOAT3 midPt)
 	{
+		return std::abs((int)(midPt.x - start.x)) + std::abs((int)(midPt.y - start.y))
+			+ std::abs((int)(position.x - midPt.x)) + std::abs((int)(position.y - midPt.y));
+	}
 
+	int GetgWeight(XMFLOAT3 start)
+	{
+		return std::abs((int)(position.x - start.x)) + std::abs((int)(position.y - start.y));
+	}
+
+	void CalculateWeight(XMFLOAT3 start, XMFLOAT3 goal)
+	{
+		gWeight = GetgWeight(start);
+		int H = std::abs((int)(position.x - goal.x)) + std::abs((int)(position.y - goal.y));
+		weight = gWeight + H;
 	}
 };
 
