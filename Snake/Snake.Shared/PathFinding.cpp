@@ -82,7 +82,8 @@ std::vector<std::shared_ptr<PathFindNode>> PathFinding::SurroundPoints(std::shar
 	return nodes;
 }
 
-std::shared_ptr<PathFindNode> PathFinding::FindPath(std::shared_ptr<PathFindNode> start, std::shared_ptr<PathFindNode> goal, std::function<bool(int, int)> isAvailable)
+std::shared_ptr<PathFindNode> PathFinding::FindPath(std::shared_ptr<PathFindNode> start, std::shared_ptr<PathFindNode> goal, 
+	std::function<bool(int, int)> isAvailable)
 {
 	std::shared_ptr<PathFindNode> tempNode = start;
 	while (tempNode->position.x != goal->position.x ||

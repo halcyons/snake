@@ -19,10 +19,6 @@ const int BackBoundary = 10;
 const int LeftBoundary = 30;
 const int RightBoundary = -30;
 
-bool isAvailable(int x, int y)
-{
-	return true;
-}
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
@@ -43,6 +39,20 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
+}
+
+bool Sample3DSceneRenderer::IsAvailable(int x, int y)
+{
+	BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+	if (m_snake->IsCollideWithSnake(node))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+		
 }
 
 Direction Sample3DSceneRenderer::MoveTo(const BaseNode& node)
@@ -345,6 +355,40 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 
 	if ((int)seconds == i)
 	{		
+		if (m_foodNode.position.x != 0.f || m_foodNode.position.y != 0.f || m_foodNode.position.z != 0.f)
+		{
+			std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+			start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
+			std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+			end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
+			//std::function<bool(int, int)> func = std::bind(&Sample3DSceneRenderer::IsAvailable, this);
+
+			std::function<bool(int, int)> func = [=](int x, int y) {
+				BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+				if (m_snake->IsCollideWithSnake(node))
+				{
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+			};
+			std::shared_ptr<PathFindNode> node = PathFinding::FindPath(start, end, func);
+			if (node == nullptr)
+			{
+
+			}
+			else
+			{
+				while (node->parent->parent != nullptr)
+				{
+					node = node->parent;
+				}
+			}
+			m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+		}		
+
 		m_snake->Move(m_nextDir);
 		i += 1;
 	}
@@ -405,23 +449,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		m_isNeedChangePos = false;
 	}
 
-	std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
-	start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
-	std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
-	end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
-	std::shared_ptr<PathFindNode> node = PathFinding::FindPath(start, end, isAvailable);
-	if (node == nullptr)
-	{
-
-	}
-	else
-	{
-		while (node->parent->parent != nullptr)
-		{
-			node = node->parent;
-		}
-	}
-	m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+	
 
 	m_foodModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixTranspose(XMMatrixTranslation(pt.X, pt.Y, 0.0f)),
 		XMLoadFloat4x4(&m_constantBufferData.view),

@@ -198,6 +198,7 @@ namespace Snake
 		void RenderBackground();
 		void Rotate(float radians);
 		void ResetViewMatrix();
+		bool IsAvailable(int x, int y);
 
 		std::shared_ptr<SnakeBase> m_snake;
 		
