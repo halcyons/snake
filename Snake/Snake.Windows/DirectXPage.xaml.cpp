@@ -252,7 +252,8 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 	// figure out the command from the keyboard
 	if (key == Windows::System::VirtualKey::W || key == Windows::System::VirtualKey::Up)		// forward
 	{
-		switch (m_main->m_snakePlane)
+		m_main->Move(Direction::up);
+		/*switch (m_main->m_snakePlane)
 		{
 		case SnakePlane::Front:
 			m_main->Move(1, Direction::up);
@@ -269,12 +270,13 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		default:
 			m_main->Move(1, Direction::up);
 			break;
-		}		
+		}	*/	
 	}
 		
 	if (key == Windows::System::VirtualKey::S || key == Windows::System::VirtualKey::Down)		// back
 	{
-		switch (m_main->m_snakePlane)
+		m_main->Move(Direction::down);
+		/*switch (m_main->m_snakePlane)
 		{
 		case SnakePlane::Front:
 			m_main->Move(1, Direction::down);
@@ -291,11 +293,12 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		default:
 			m_main->Move(1, Direction::down);
 			break;
-		}
+		}*/
 	}		
 	if (key == Windows::System::VirtualKey::A || key == Windows::System::VirtualKey::Left)		// left
 	{
-		switch (m_main->m_snakePlane)
+		m_main->Move(Direction::left);
+		/*switch (m_main->m_snakePlane)
 		{
 		case SnakePlane::Left:
 			m_main->Move(1, Direction::in);
@@ -307,11 +310,12 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		default:
 			m_main->Move(1, Direction::left);
 			break;
-		}
+		}*/
 	}
 	if (key == Windows::System::VirtualKey::D || key == Windows::System::VirtualKey::Right)		// right
 	{
-		switch (m_main->m_snakePlane)
+		m_main->Move(Direction::right);
+		/*switch (m_main->m_snakePlane)
 		{
 		case SnakePlane::Left:
 			m_main->Move(1, Direction::out);
@@ -322,7 +326,7 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 		default:
 			m_main->Move(1, Direction::right);
 			break;
-		}
+		}*/
 	}
 }
 
@@ -330,7 +334,7 @@ void DirectXPage::Page_KeyDown(Platform::Object^ sender, Windows::UI::Xaml::Inpu
 void DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	overlayGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-	m_main->GameInitialize(3);
+	m_main->GameInitialize();
 	m_isNeedRender = true;
 }
 

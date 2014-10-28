@@ -6,18 +6,9 @@
 #include <vector>
 #include "DirectXCollision.h"
 #include "Common\LoadCMOModel.h"
+#include "SnakeBase.h"
 namespace Snake
 {
-	enum Direction
-	{
-		up = 1,
-		right = 2,
-		in = 3,
-		down = -1,
-		left = -2,
-		out = -3
-	};
-
 	enum SnakePlane
 	{
 		Front,
@@ -28,7 +19,7 @@ namespace Snake
 		Right
 	};
 
-	struct Node
+	/*struct Node
 	{
 		int x = 0;
 		int y = 0;
@@ -47,115 +38,126 @@ namespace Snake
 			this->z = z;
 			this->boundingBox.Center = DirectX::XMFLOAT3((float)x, (float)y, (float)z);
 		}
-	};
+	};*/
 
-	struct List
-	{
-		Node* listHead;
-		Node* listEnd;
-		int count = 1;
-		List(int length, DirectX::BoundingBox boundingBox)
-		{			
-			listHead = new Node(boundingBox);
-			listEnd = listHead;
-			
-			// Add (length - 1) other nodes.
-			for (int i = 0; i < length - 1; ++i)
-			{
-				AddHeader();
-			}
-		}
-		// Add node to the header.
-		void AddHeader()
-		{
-			Node* node = new Node(listHead->boundingBox);
-			
-			node->direction = listHead->direction;
-			switch (listHead->direction)
-			{
-			case Direction::up:
-				node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
-				break;
-			case Direction::down:
-				node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
-				break;
-			case Direction::left:
-				node->SetCoordinate(listHead->x + 1, listHead->y, listHead->z);
-				break;
-			case Direction::right:
-				node->SetCoordinate(listHead->x - 1, listHead->y, listHead->z);
-				break;
-			case Direction::in:
-				node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
-				break;
-			case Direction::out:
-				node->SetCoordinate(listHead->x, listHead->y, listHead->z - 1);
-				break;
-			}
-			node->next = listHead;
-			listHead = node;
-			count++;
-		}
+	//struct List
+	//{
+	//	Node* listHead;
+	//	Node* listEnd;
+	//	int count = 1;
+	//	List(int length, DirectX::BoundingBox boundingBox)
+	//	{			
+	//		listHead = new Node(boundingBox);
+	//		listEnd = listHead;
+	//		
+	//		// Add (length - 1) other nodes.
+	//		for (int i = 0; i < length - 1; ++i)
+	//		{
+	//			AddHeader();
+	//		}
+	//	}
+	//	// Add node to the header.
+	//	void AddHeader()
+	//	{
+	//		Node* node = new Node(listHead->boundingBox);
+	//		
+	//		node->direction = listHead->direction;
+	//		switch (listHead->direction)
+	//		{
+	//		case Direction::up:
+	//			node->SetCoordinate(listHead->x, listHead->y + 1, listHead->z);
+	//			break;
+	//		case Direction::down:
+	//			node->SetCoordinate(listHead->x, listHead->y - 1, listHead->z);
+	//			break;
+	//		case Direction::left:
+	//			node->SetCoordinate(listHead->x + 1, listHead->y, listHead->z);
+	//			break;
+	//		case Direction::right:
+	//			node->SetCoordinate(listHead->x - 1, listHead->y, listHead->z);
+	//			break;
+	//		case Direction::in:
+	//			node->SetCoordinate(listHead->x, listHead->y, listHead->z + 1);
+	//			break;
+	//		case Direction::out:
+	//			node->SetCoordinate(listHead->x, listHead->y, listHead->z - 1);
+	//			break;
+	//		}
+	//		node->next = listHead;
+	//		listHead = node;
+	//		count++;
+	//	}
+	//	// Add header to a specify point. Used for AI.
+	//	void AddHeader(int x, int y)
+	//	{
+	//		Node* node = new Node(listHead->boundingBox);
+	//		
+	//		node->SetCoordinate(x, y, listHead->z);
 
-		// Delete the tail.
-		void DelTail()
-		{
-			Node* node = listHead;
-			while (node->next != listEnd)
-			{
-				node = node->next;
-			}
-			delete node->next;
-			node->next = nullptr;
-			
+	//		node->next = listHead;
+	//		listHead = node;
+	//		count++;
+	//	}
 
-			listEnd = node;
-			node = nullptr;
+	//	// Delete the tail.
+	//	void DelTail()
+	//	{
+	//		Node* node = listHead;
+	//		while (node->next != listEnd)
+	//		{
+	//			node = node->next;
+	//		}
+	//		delete node->next;
+	//		node->next = nullptr;
+	//		
 
-			count--;
-		}
+	//		listEnd = node;
+	//		node = nullptr;
 
-		// 
-		bool IsCollideWithBody()
-		{
-			bool is = false;
-			if (count > 3)
-			{		
-				Node* start = listHead->next->next->next;
+	//		count--;
+	//	}
 
-				is = IsCollideWithBB(listHead->boundingBox, start, listEnd);
-			}
-			return is;
-			
-		}		
+	//	// 
+	//	bool IsCollideWithBody()
+	//	{
+	//		bool is = false;
+	//		if (count > 3)
+	//		{		
+	//			Node* start = listHead->next->next->next;
 
-		bool IsCollideWithBB(DirectX::BoundingBox bb, Node* start, Node* end)
-		{			
-			Node* tempNode = start;
-			DirectX::BoundingBox tempBB(bb.Center, DirectX::XMFLOAT3(bb.Extents.x / 2, bb.Extents.y/ 2, bb.Extents.z / 2));
-			while (tempNode != end->next)
-			{
-				if (tempNode->boundingBox.Contains(tempBB) == DirectX::ContainmentType::CONTAINS)
-					return true;
-				tempNode = tempNode->next;
-			}			
-			return false;
-		}
+	//			is = IsCollideWithBB(listHead->boundingBox, start, listEnd);
+	//		}
+	//		return is;
+	//		
+	//	}		
 
-		bool Contains(XMFLOAT3 pt)
-		{
-			Node* tempNode = listHead;
-			for (int i = 0; i < count; ++i)
-			{				
-				if (tempNode->x == pt.x && tempNode->y == pt.y && tempNode->z == pt.z)
-				{
-					return true;
-				}
-				tempNode = tempNode->next;
-			}
-			return false;
-		}
-	};
+	//	bool IsCollideWithBB(DirectX::BoundingBox bb, Node* start, Node* end)
+	//	{			
+	//		Node* tempNode = start;
+	//		DirectX::BoundingBox tempBB(bb.Center, DirectX::XMFLOAT3(bb.Extents.x / 2, bb.Extents.y/ 2, bb.Extents.z / 2));
+	//		while (tempNode != end->next)
+	//		{
+	//			if (tempNode->boundingBox.Contains(tempBB) == DirectX::ContainmentType::CONTAINS)
+	//				return true;
+	//			tempNode = tempNode->next;
+	//		}			
+	//		return false;
+	//	}
+
+	//	bool Contains(XMFLOAT3 pt)
+	//	{
+	//		Node* tempNode = listHead;
+	//		for (int i = 0; i < count; ++i)
+	//		{				
+	//			if (tempNode->x == pt.x && tempNode->y == pt.y && tempNode->z == pt.z)
+	//			{
+	//				return true;
+	//			}
+	//			tempNode = tempNode->next;
+	//		}
+	//		return false;
+	//	}
+	//};
 
 	
 
@@ -175,12 +177,12 @@ namespace Snake
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }
 
+		void Move(Direction dir);
 		
-		void Move(int step);
-		void Move(int step, Direction direction);
+
 		void ChangeDirection(Direction direction);
 
-		void GameInitialize(int snakeLength);
+		void GameInitialize();
 
 		void ScrollViewMatrix();
 
@@ -197,13 +199,12 @@ namespace Snake
 		void Rotate(float radians);
 		void ResetViewMatrix();
 
-		std::vector<XMFLOAT3> SurroundPoints(XMFLOAT3 pt);
-		bool IsAvailable(XMFLOAT3 pt);
-		std::vector<XMFLOAT3> PathFinding();
-		std::unique_ptr<List> m_snake;
+		std::shared_ptr<SnakeBase> m_snake;
+		
 		bool m_isNeedChangePos;
 
-		DirectX::BoundingBox m_foodBB;
+		//DirectX::BoundingBox m_foodBB;
+		BaseNode	m_foodNode;
 
 	private:
 
@@ -247,7 +248,7 @@ namespace Snake
 		bool	m_tracking;
 		bool	m_isNeedScroll;
 		float	m_angle;
-
+		bool	m_isAutoPlay;
 		DirectX::XMFLOAT4X4 m_viewRotation;
 		
 	};

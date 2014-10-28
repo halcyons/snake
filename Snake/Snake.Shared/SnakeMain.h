@@ -18,13 +18,13 @@ namespace Snake
 		void TrackingUpdate(float positionX) { m_pointerLocationX = positionX; }
 		void StopTracking() { m_sceneRenderer->StopTracking(); }
 		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
-		void GameInitialize(int length) { m_sceneRenderer->GameInitialize(length); }
+		void GameInitialize() { m_sceneRenderer->GameInitialize(); }
 
 		void Update();
 		bool Render();
 
 		void ChangeDirection(Direction direction){ m_sceneRenderer->ChangeDirection(direction); }
-		void Move(int step, Direction direction) { m_sceneRenderer->Move(step, direction); }
+		void Move(Direction direction) { m_sceneRenderer->Move(direction); }
 
 		// IDeviceNotify
 		virtual void OnDeviceLost();
