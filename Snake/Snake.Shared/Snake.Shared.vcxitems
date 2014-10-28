@@ -17,6 +17,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PathFinding.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeBase.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeNode.cpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseMath.h" />
@@ -25,6 +26,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\WICTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PathFinding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeBase.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeMain.h" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />

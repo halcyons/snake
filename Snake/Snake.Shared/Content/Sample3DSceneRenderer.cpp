@@ -6,7 +6,7 @@
 #include "Common\WICTextureLoader.h"
 #include <random>
 #include "DirectXPackedVector.h"
-
+#include "PathFinding.h"
 using namespace Snake;
 
 using namespace DirectX;
@@ -18,6 +18,11 @@ const int FrontBoundary = 0;
 const int BackBoundary = 10;
 const int LeftBoundary = 30;
 const int RightBoundary = -30;
+
+bool isAvailable(int x, int y)
+{
+	return true;
+}
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
@@ -32,11 +37,33 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_isNeedScroll(false),
 	m_angle(0.0f),
 	m_snakePlane(SnakePlane::Front),
-	m_isAutoPlay(false)
+	m_isAutoPlay(false),
+	m_nextDir(Direction::up)
 {
 	XMStoreFloat4x4(&m_model, XMMatrixIdentity());
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
+}
+
+Direction Sample3DSceneRenderer::MoveTo(const BaseNode& node)
+{
+	float3 pos = m_snake->GetSnakeList().front().position;
+	if (pos.x > node.position.x)
+	{
+		return Direction::left;
+	}
+	else if (pos.x < node.position.x)
+	{
+		return Direction::right;
+	}
+	if (pos.y > node.position.y)
+	{
+		return Direction::down;
+	}
+	else if (pos.y < node.position.y)
+	{
+		return Direction::up;
+	}
 }
 
 void Sample3DSceneRenderer::Move(Direction dir)
@@ -317,8 +344,8 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 	static int i = 0;
 
 	if ((int)seconds == i)
-	{
-		m_snake->Move();
+	{		
+		m_snake->Move(m_nextDir);
 		i += 1;
 	}
 
@@ -377,6 +404,24 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 
 		m_isNeedChangePos = false;
 	}
+
+	std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+	start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
+	std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+	end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
+	std::shared_ptr<PathFindNode> node = PathFinding::FindPath(start, end, isAvailable);
+	if (node == nullptr)
+	{
+
+	}
+	else
+	{
+		while (node->parent->parent != nullptr)
+		{
+			node = node->parent;
+		}
+	}
+	m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
 
 	m_foodModel->Draw(context, m_deviceResources->GetD3DDevice(), XMMatrixTranspose(XMMatrixTranslation(pt.X, pt.Y, 0.0f)),
 		XMLoadFloat4x4(&m_constantBufferData.view),

@@ -178,7 +178,7 @@ namespace Snake
 		bool IsTracking() { return m_tracking; }
 
 		void Move(Direction dir);
-		
+		Direction MoveTo(const BaseNode& node);
 
 		void ChangeDirection(Direction direction);
 
@@ -250,6 +250,8 @@ namespace Snake
 		float	m_angle;
 		bool	m_isAutoPlay;
 		DirectX::XMFLOAT4X4 m_viewRotation;
+
+		Direction m_nextDir;
 		
 	};
 }

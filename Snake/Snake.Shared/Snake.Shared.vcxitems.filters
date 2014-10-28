@@ -34,6 +34,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeBase.h">
       <Filter>SnakeStructs</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)PathFinding.h">
+      <Filter>PathFinding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
@@ -57,6 +60,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeBase.cpp">
       <Filter>SnakeStructs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)PathFinding.cpp">
+      <Filter>PathFinding</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +90,9 @@
     </Filter>
     <Filter Include="SnakeStructs">
       <UniqueIdentifier>{6a3d3f61-8674-4b60-98ee-3d74e8ca1269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PathFinding">
+      <UniqueIdentifier>{f2d6d08a-69e9-4273-b643-305bcbacfcfc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
