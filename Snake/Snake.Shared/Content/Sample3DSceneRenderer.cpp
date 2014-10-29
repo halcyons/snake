@@ -355,7 +355,9 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 
 	if ((int)seconds == i)
 	{		
-		if (m_foodNode.position.x != 0.f || m_foodNode.position.y != 0.f || m_foodNode.position.z != 0.f)
+		PathFinding pathFinding;
+		std::shared_ptr<PathFindNode> node = std::make_shared<PathFindNode>();
+		if (!m_isNeedChangePos)
 		{
 			std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
 			start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
@@ -374,7 +376,7 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 					return true;
 				}
 			};
-			std::shared_ptr<PathFindNode> node = PathFinding::FindPath(start, end, func);
+			node.swap(pathFinding.FindPath(start, end, func));
 			if (node == nullptr)
 			{
 
@@ -387,6 +389,7 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 				}
 			}
 			m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+			node = nullptr;
 		}		
 
 		m_snake->Move(m_nextDir);

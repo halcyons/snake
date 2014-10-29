@@ -50,12 +50,13 @@ struct PathFindNode
 class PathFinding
 {
 public:
-	static std::shared_ptr<PathFindNode> FindPath(std::shared_ptr<PathFindNode> start, std::shared_ptr<PathFindNode> goal, std::function<bool(int, int)> isAvailable = true);
+	PathFinding();
+	std::shared_ptr<PathFindNode> FindPath(std::shared_ptr<PathFindNode> start, std::shared_ptr<PathFindNode> goal, std::function<bool(int, int)> isAvailable = true);
 
 private:
-	static std::vector<std::shared_ptr<PathFindNode>> SurroundPoints(std::shared_ptr<PathFindNode> node, std::function<bool(int, int)> isAvailable = true);
-	static std::vector<std::shared_ptr<PathFindNode>>::iterator Contains(std::vector<std::shared_ptr<PathFindNode>> &nodes, std::shared_ptr<PathFindNode> node);
-	static std::vector<std::shared_ptr<PathFindNode>> m_openList;
-	static std::vector<std::shared_ptr<PathFindNode>> m_closeList;
+	std::vector<std::shared_ptr<PathFindNode>> SurroundPoints(std::shared_ptr<PathFindNode> node, std::function<bool(int, int)> isAvailable = true);
+	std::vector<std::shared_ptr<PathFindNode>>::iterator Contains(std::vector<std::shared_ptr<PathFindNode>> &nodes, std::shared_ptr<PathFindNode> node);
+	std::vector<std::shared_ptr<PathFindNode>> m_openList;
+	std::vector<std::shared_ptr<PathFindNode>> m_closeList;
 };
 

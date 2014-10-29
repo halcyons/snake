@@ -8,9 +8,12 @@ bool compa(std::shared_ptr<PathFindNode> n1, std::shared_ptr<PathFindNode> n2)
 	return n1->weight > n2->weight;
 }
 
+PathFinding::PathFinding()
+{
+	m_openList = std::vector<std::shared_ptr<PathFindNode>>();
+	m_closeList = std::vector<std::shared_ptr<PathFindNode>>();
+}
 
-std::vector<std::shared_ptr<PathFindNode>> PathFinding::m_openList = std::vector<std::shared_ptr<PathFindNode>>();
-std::vector<std::shared_ptr<PathFindNode>> PathFinding::m_closeList = std::vector<std::shared_ptr<PathFindNode>>();
 // Use reference type to prevent copying the parameter(nodes), so that the retured iterator is compatible.
 std::vector<std::shared_ptr<PathFindNode>>::iterator PathFinding::Contains(std::vector<std::shared_ptr<PathFindNode>> &nodes, std::shared_ptr<PathFindNode> node)
 {
@@ -70,7 +73,7 @@ std::vector<std::shared_ptr<PathFindNode>> PathFinding::SurroundPoints(std::shar
 	std::shared_ptr<PathFindNode> downNode = std::make_shared<PathFindNode>();
 
 	downNode->position = XMFLOAT3(node->position.x, node->position.y - 1, node->position.z);
-	if (Contains(m_closeList, downNode) == m_closeList.end() && isAvailable((int)downNode->position.x, (int)upNode->position.y))
+	if (Contains(m_closeList, downNode) == m_closeList.end() && isAvailable((int)downNode->position.x, (int)downNode->position.y))
 	{
 		if (Contains(m_openList, downNode) == m_openList.end())
 		{
