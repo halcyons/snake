@@ -97,21 +97,14 @@ bool SnakeBase::IsCollideWithWall()
 
 bool SnakeBase::IsCollideWithBody()
 {
-	float3 header = m_snakeList.front().position;
-	for (int i = 1; i < GetSize(); i++)
-	{
-		BaseNode node = m_snakeList[i];
-		if (m_snakeList.front() == node)
-		{
-			return true;
-		}
-	}
-	return false;
+	//float3 header = .position;
+	return IsCollideWithSnake(m_snakeList.front(), 1, m_snakeList.size());
+	
 }
 
-bool SnakeBase::IsCollideWithSnake(const BaseNode& node)
+bool SnakeBase::IsCollideWithSnake(const BaseNode& node, int snakeStartIndex, int snakeEndIndex)
 {
-	for (int i = 0; i < GetSize(); i++)
+	for (int i = snakeStartIndex; i < snakeEndIndex; i++)
 	{
 		BaseNode tempNode = m_snakeList[i];
 		if (tempNode == node)

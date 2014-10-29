@@ -44,7 +44,7 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 bool Sample3DSceneRenderer::IsAvailable(int x, int y)
 {
 	BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
-	if (m_snake->IsCollideWithSnake(node))
+	if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize()))
 	{
 		return false;
 	}
@@ -352,49 +352,133 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 
 
 	static int i = 0;
+	PathFinding pathFinding;
+	std::shared_ptr<PathFindNode> node = std::make_shared<PathFindNode>();
+	if (!m_isNeedChangePos)
+	{
+		std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+		start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
+		std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+		end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
+		//std::function<bool(int, int)> func = std::bind(&Sample3DSceneRenderer::IsAvailable, this);
+		std::function<bool(int, int)> func = [=](int x, int y) {
+			BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
 
-	if ((int)seconds == i)
-	{		
-		PathFinding pathFinding;
-		std::shared_ptr<PathFindNode> node = std::make_shared<PathFindNode>();
-		if (!m_isNeedChangePos)
-		{
-			std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
-			start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
-			std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
-			end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
-			//std::function<bool(int, int)> func = std::bind(&Sample3DSceneRenderer::IsAvailable, this);
-
-			std::function<bool(int, int)> func = [=](int x, int y) {
-				BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
-				if (m_snake->IsCollideWithSnake(node))
-				{
-					return false;
-				}
-				else
-				{
-					return true;
-				}
-			};
-			node.swap(pathFinding.FindPath(start, end, func));
-			if (node == nullptr)
+			if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize())
+				|| x > 11 || y > 11
+				|| x < -11 || y < -11
+				)
 			{
-
+				return false;
 			}
 			else
 			{
-				while (node->parent->parent != nullptr)
-				{
-					node = node->parent;
-				}
+				return true;
 			}
-			m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
-			node = nullptr;
-		}		
+		};
 
+		std::function<bool(int, int)> func1 = [=](int x, int y) {
+			BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+
+			if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize() - 1) // ignore the tail.
+				|| x > 11 || y > 11
+				|| x < -11 || y < -11
+				)
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		};
+
+		std::function<bool(int, int)> canFindTail = [=](int x, int y){
+			std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+			start->position = XMFLOAT3(x, y, 0.0f);
+			std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+			end->position = XMFLOAT3(m_snake->GetSnakeList().back().position.x, m_snake->GetSnakeList().back().position.y, 0.0f);
+			PathFinding pathFind;
+			if (pathFind.FindPath(start, end, func1) != nullptr)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		};
+		
+		std::function<bool(int, int)> canAchieve = [=](int x, int y){
+			if (func(x, y) && canFindTail(x, y))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		};
+		node.swap(pathFinding.FindPath(start, end, canAchieve));
+		if (node == nullptr)
+		{
+			
+		}
+		else
+		{
+			while (node->parent->parent != nullptr)
+			{
+				node = node->parent;
+			}
+		}
+		m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+		node = nullptr;
 		m_snake->Move(m_nextDir);
-		i += 1;
 	}
+
+	
+	//if ((int)seconds == i)
+	//{		
+	//	PathFinding pathFinding;
+	//	std::shared_ptr<PathFindNode> node = std::make_shared<PathFindNode>();
+	//	if (!m_isNeedChangePos)
+	//	{
+	//		std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+	//		start->position = XMFLOAT3(m_snake->GetSnakeList().front().position.x, m_snake->GetSnakeList().front().position.y, 0.0f);
+	//		std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+	//		end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
+	//		//std::function<bool(int, int)> func = std::bind(&Sample3DSceneRenderer::IsAvailable, this);
+
+	//		std::function<bool(int, int)> func = [=](int x, int y) {
+	//			BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+	//			if (m_snake->IsCollideWithSnake(node))
+	//			{
+	//				return false;
+	//			}
+	//			else
+	//			{
+	//				return true;
+	//			}
+	//		};
+	//		node.swap(pathFinding.FindPath(start, end, func));
+	//		if (node == nullptr)
+	//		{
+
+	//		}
+	//		else
+	//		{
+	//			while (node->parent->parent != nullptr)
+	//			{
+	//				node = node->parent;
+	//			}
+	//		}
+	//		m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+	//		node = nullptr;
+	//	}		
+
+	//	m_snake->Move(m_nextDir);
+	//	i += 1;
+	//}
 
 }
 
@@ -447,7 +531,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 			m_foodNode = BaseNode(float3(pt.X, pt.Y, 0.0f));
 			//m_foodBB = m_foodModel->meshes[0]->BoundingBox;
 			//m_foodBB.Center = XMFLOAT3(pt.X, pt.Y, 0.0f);
-		} while (m_snake->IsCollideWithSnake(m_foodNode));
+		} while (m_snake->IsCollideWithSnake(m_foodNode, 0, m_snake->GetSize()));
 
 		m_isNeedChangePos = false;
 	}

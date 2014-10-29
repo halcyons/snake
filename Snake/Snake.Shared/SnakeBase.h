@@ -22,7 +22,7 @@ public:
 	void Move(const Direction& dir);
 	bool IsCollideWithWall();
 	bool IsCollideWithBody();
-	bool IsCollideWithSnake(const BaseNode& node);
+	bool IsCollideWithSnake(const BaseNode& node, int snakeStartIndex, int snakeEndIndex);
 	bool IsCollideWithNode(const BaseNode& node);
 	
 private:

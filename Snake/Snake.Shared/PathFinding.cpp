@@ -5,7 +5,15 @@
 
 bool compa(std::shared_ptr<PathFindNode> n1, std::shared_ptr<PathFindNode> n2)
 {
-	return n1->weight > n2->weight;
+	if (n1->weight == n2->weight)
+	{
+		return n1->position.x > n2->position.x;
+	}
+	else
+	{
+		return n1->weight > n2->weight;
+	}
+	
 }
 
 PathFinding::PathFinding()
