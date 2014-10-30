@@ -377,49 +377,49 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 			}
 		};
 
-		std::function<bool(int, int)> func1 = [=](int x, int y) {
-			BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+		//std::function<bool(int, int)> func1 = [=](int x, int y) {
+		//	BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
 
-			if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize() - 1) // ignore the tail.
-				|| x > 11 || y > 11
-				|| x < -11 || y < -11
-				)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
-		};
+		//	if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize() - 1) // ignore the tail.
+		//		|| x > 11 || y > 11
+		//		|| x < -11 || y < -11
+		//		)
+		//	{
+		//		return false;
+		//	}
+		//	else
+		//	{
+		//		return true;
+		//	}
+		//};
 
-		std::function<bool(int, int)> canFindTail = [=](int x, int y){
-			std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
-			start->position = XMFLOAT3(x, y, 0.0f);
-			std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
-			end->position = XMFLOAT3(m_snake->GetSnakeList().back().position.x, m_snake->GetSnakeList().back().position.y, 0.0f);
-			PathFinding pathFind;
-			if (pathFind.FindPath(start, end, func1) != nullptr)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		};
-		
-		std::function<bool(int, int)> canAchieve = [=](int x, int y){
-			if (func(x, y) && canFindTail(x, y))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		};
-		node.swap(pathFinding.FindPath(start, end, canAchieve));
+		//std::function<bool(int, int)> canFindTail = [=](int x, int y){
+		//	std::shared_ptr<PathFindNode> start = std::make_shared<PathFindNode>();
+		//	start->position = XMFLOAT3(x, y, 0.0f);
+		//	std::shared_ptr<PathFindNode> end = std::make_shared<PathFindNode>();
+		//	end->position = XMFLOAT3(m_snake->GetSnakeList().back().position.x, m_snake->GetSnakeList().back().position.y, 0.0f);
+		//	PathFinding pathFind;
+		//	if (pathFind.FindPath(start, end, func1) != nullptr)
+		//	{
+		//		return true;
+		//	}
+		//	else
+		//	{
+		//		return false;
+		//	}
+		//};
+		//
+		//std::function<bool(int, int)> canAchieve = [=](int x, int y){
+		//	if (func(x, y) && canFindTail(x, y))
+		//	{
+		//		return true;
+		//	}
+		//	else
+		//	{
+		//		return false;
+		//	}
+		//};
+		node.swap(pathFinding.FindPath(start, end, func));
 		if (node == nullptr)
 		{
 			

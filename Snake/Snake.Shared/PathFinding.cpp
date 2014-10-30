@@ -101,6 +101,10 @@ std::shared_ptr<PathFindNode> PathFinding::FindPath(std::shared_ptr<PathFindNode
 		tempNode->position.y != goal->position.y ||
 		tempNode->position.z != goal->position.z)
 	{
+		/*if (start->position.x == 11.f || start->position.x == -11.f || start->position.y == 11.f || start->position.y == -11.f)
+		{
+			int x = 1;
+		}*/
 		m_closeList.push_back(tempNode);
 		for (std::shared_ptr<PathFindNode> node : SurroundPoints(tempNode, isAvailable))
 		{
@@ -122,17 +126,18 @@ std::shared_ptr<PathFindNode> PathFinding::FindPath(std::shared_ptr<PathFindNode
 				m_openList.push_back(node);
 			}
 		}
-
-		std::sort(m_openList.begin(), m_openList.end(), compa);
-		// The node whose weight is the smallest.
-		std::shared_ptr<PathFindNode> node = *(m_openList.end() - 1);
-		m_openList.erase(m_openList.end() - 1);
-		tempNode = node;
 		// Not find the path.
 		if (m_openList.size() == 0)
 		{
 			return nullptr;
 		}
+		std::sort(m_openList.begin(), m_openList.end(), compa);
+		// The node whose weight is the smallest.
+		std::shared_ptr<PathFindNode> node = *(m_openList.end() - 1);
+		
+		tempNode = node;
+		
+		m_openList.erase(m_openList.end() - 1);
 	}
 	return tempNode;
 }

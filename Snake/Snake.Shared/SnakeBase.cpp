@@ -9,6 +9,25 @@ SnakeBase::SnakeBase() :m_dir(Direction::up)
 	m_snakeList.push_front(node);
 	AddHeaderTo(m_dir);
 	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	m_dir = Direction::right;
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	m_dir = Direction::down;
+	AddHeaderTo(m_dir);
+	m_dir = Direction::left;
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	AddHeaderTo(m_dir);
+	/*AddHeaderTo(Direction::up);
+	AddHeaderTo(Direction::up);
+	AddHeaderTo(Direction::up);
+	AddHeaderTo(Direction::up);*/
+	//m_dir = Direction::left;
+
 }
 
 SnakeBase::~SnakeBase()
