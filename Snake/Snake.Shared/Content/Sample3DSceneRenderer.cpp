@@ -43,7 +43,7 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 
 bool Sample3DSceneRenderer::IsAvailable(int x, int y)
 {
-	BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+	DXSnakeNode node = DXSnakeNode(float3((float)x, (float)y, 0.0f));
 	if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize()))
 	{
 		return false;
@@ -55,7 +55,7 @@ bool Sample3DSceneRenderer::IsAvailable(int x, int y)
 		
 }
 
-Direction Sample3DSceneRenderer::MoveTo(const BaseNode& node)
+Direction Sample3DSceneRenderer::MoveTo(const DXSnakeNode& node)
 {
 	float3 pos = m_snake->GetSnakeList().front().position;
 	if (pos.x > node.position.x)
@@ -246,7 +246,7 @@ void Sample3DSceneRenderer::GameInitialize()
 	{
 		m_snake.release();
 	}*/
-	m_snake = std::make_shared<SnakeBase>();
+	m_snake = std::make_shared<SnakeClass>();
 	m_isGameOver = false;
 	ResetViewMatrix();
 	//m_snakePlane = SnakePlane::Front;
@@ -362,7 +362,7 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 		end->position = XMFLOAT3(m_foodNode.position.x, m_foodNode.position.y, 0.0f);
 		//std::function<bool(int, int)> func = std::bind(&Sample3DSceneRenderer::IsAvailable, this);
 		std::function<bool(int, int)> func = [=](int x, int y) {
-			BaseNode node = BaseNode(float3((float)x, (float)y, 0.0f));
+			DXSnakeNode node = DXSnakeNode(float3((float)x, (float)y, 0.0f));
 
 			if (m_snake->IsCollideWithSnake(node, 0, m_snake->GetSize())
 				|| x > 11 || y > 11
@@ -431,9 +431,12 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 				node = node->parent;
 			}
 		}
-		m_nextDir = MoveTo(BaseNode(float3(node->position.x, node->position.y, node->position.z)));
+		m_nextDir = MoveTo(DXSnakeNode(float3(node->position.x, node->position.y, node->position.z)));
 		node = nullptr;
-		m_snake->Move(m_nextDir);
+		if (!m_isNeedChangePos)
+		{
+			m_snake->Move(m_nextDir);
+		}		
 	}
 
 	
@@ -528,7 +531,7 @@ bool Sample3DSceneRenderer::RenderFood(ID3D11DeviceContext* context)
 		do
 		{
 			pt = RandomPosition(-10, 10);
-			m_foodNode = BaseNode(float3(pt.X, pt.Y, 0.0f));
+			m_foodNode = DXSnakeNode(float3(pt.X, pt.Y, 0.0f));
 			//m_foodBB = m_foodModel->meshes[0]->BoundingBox;
 			//m_foodBB.Center = XMFLOAT3(pt.X, pt.Y, 0.0f);
 		} while (m_snake->IsCollideWithSnake(m_foodNode, 0, m_snake->GetSize()));
@@ -601,7 +604,7 @@ bool Sample3DSceneRenderer::Render()
 	
 	for (int i = 0; i < m_snake->GetSize(); ++i)
 	{
-		std::shared_ptr<BaseNode> snakeNode = std::make_shared<BaseNode>(m_snake->GetSnakeList()[i]);
+		std::shared_ptr<NodeBase> snakeNode = std::make_shared<NodeBase>(m_snake->GetSnakeList()[i]);
 		if (snakeNode == nullptr)
 		{
 			continue;
@@ -633,9 +636,9 @@ bool Sample3DSceneRenderer::Render()
 	}
 	
 	if (m_snake->IsCollideWithNode(m_foodNode))
-	{
-		m_snake->Eat();
+	{		
 		m_isNeedChangePos = true;
+		m_snake->Eat();
 	}
 	if (m_snake->IsCollideWithBody() || m_snake->IsCollideWithWall())
 	{

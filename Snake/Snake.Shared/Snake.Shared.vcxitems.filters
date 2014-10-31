@@ -25,18 +25,22 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Content\ShaderStructures.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)SnakeNode.h">
-      <Filter>SnakeStructs</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseMath.h">
-      <Filter>SnakeStructs</Filter>
+      <Filter>SnakeCommon</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)SnakeBase.h">
-      <Filter>SnakeStructs</Filter>
+      <Filter>SnakeCommon</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)PathFinding.h">
       <Filter>PathFinding</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NodeBase.h">
+      <Filter>SnakeCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DXSnakeNode.h">
+      <Filter>SnakeStructs</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SnakeClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeMain.cpp" />
@@ -55,15 +59,19 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\DDSTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Common\LoadCMOModel.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)SnakeNode.cpp">
-      <Filter>SnakeStructs</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)SnakeBase.cpp">
-      <Filter>SnakeStructs</Filter>
+      <Filter>SnakeCommon</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)PathFinding.cpp">
       <Filter>PathFinding</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NodeBase.cpp">
+      <Filter>SnakeCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)DXSnakeNode.cpp">
+      <Filter>SnakeStructs</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)SnakeClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Content\SamplePixelShader.hlsl">
@@ -88,11 +96,14 @@
     <Filter Include="Content">
       <UniqueIdentifier>{1d211906-70cc-4e74-a4fd-15334e7b64cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SnakeStructs">
-      <UniqueIdentifier>{6a3d3f61-8674-4b60-98ee-3d74e8ca1269}</UniqueIdentifier>
-    </Filter>
     <Filter Include="PathFinding">
       <UniqueIdentifier>{f2d6d08a-69e9-4273-b643-305bcbacfcfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SnakeCommon">
+      <UniqueIdentifier>{6a3d3f61-8674-4b60-98ee-3d74e8ca1269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SnakeStructs">
+      <UniqueIdentifier>{99deda81-6ceb-4538-a301-c49b0595c92a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

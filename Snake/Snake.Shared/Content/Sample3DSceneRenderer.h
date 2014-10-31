@@ -4,9 +4,9 @@
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
 #include <vector>
-#include "DirectXCollision.h"
+
 #include "Common\LoadCMOModel.h"
-#include "SnakeBase.h"
+#include "SnakeClass.h"
 namespace Snake
 {
 	enum SnakePlane
@@ -178,7 +178,7 @@ namespace Snake
 		bool IsTracking() { return m_tracking; }
 
 		void Move(Direction dir);
-		Direction MoveTo(const BaseNode& node);
+		Direction MoveTo(const DXSnakeNode& node);
 
 		void ChangeDirection(Direction direction);
 
@@ -200,12 +200,12 @@ namespace Snake
 		void ResetViewMatrix();
 		bool IsAvailable(int x, int y);
 
-		std::shared_ptr<SnakeBase> m_snake;
+		std::shared_ptr<SnakeClass> m_snake;
 		
 		bool m_isNeedChangePos;
 
 		//DirectX::BoundingBox m_foodBB;
-		BaseNode	m_foodNode;
+		DXSnakeNode	m_foodNode;
 
 	private:
 
